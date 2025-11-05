@@ -23,11 +23,19 @@ import {
   Users,
   Clock,
 } from "lucide-react";
+import useEmblaCarousel from "embla-carousel-react";
+import Autoplay from "embla-carousel-autoplay";
 
 export default function Home() {
   const [newBooks, setNewBooks] = useState([]);
   const [announcements, setAnnouncements] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  // Embla Carousel for Features section with infinite loop and autoplay
+  const [emblaRef] = useEmblaCarousel(
+    { loop: true, align: "start" },
+    [Autoplay({ delay: 3500, stopOnInteraction: false })]
+  );
 
   useEffect(() => {
     fetchHomeData();
@@ -88,45 +96,98 @@ export default function Home() {
       </section>
 
       {/* Features Section */}
-      <section className="py-16 bg-white dark:bg-black">
+      <section className="py-16 bg-white dark:bg-black overflow-hidden">
         <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <Card className="text-center">
-              <CardHeader>
-                <div className="mx-auto mb-4 p-3 bg-primary/10 rounded-full w-fit">
-                  <BookOpen className="h-8 w-8 text-primary" />
-                </div>
-                <CardTitle>Vast Collection</CardTitle>
-                <CardDescription>
-                  Access thousands of books across multiple categories and
-                  genres
-                </CardDescription>
-              </CardHeader>
-            </Card>
+          <div className="overflow-hidden" ref={emblaRef}>
+            <div className="flex">
+              {/* First set of slides */}
+              <div className="flex-[0_0_100%] min-w-0 md:flex-[0_0_50%] lg:flex-[0_0_33.333%] pl-3 pr-3">
+                <Card className="text-center h-full">
+                  <CardHeader>
+                    <div className="mx-auto mb-4 p-3 bg-primary/10 rounded-full w-fit">
+                      <BookOpen className="h-8 w-8 text-primary" />
+                    </div>
+                    <CardTitle>Vast Collection</CardTitle>
+                    <CardDescription>
+                      Access thousands of books across multiple categories and
+                      genres
+                    </CardDescription>
+                  </CardHeader>
+                </Card>
+              </div>
 
-            <Card className="text-center">
-              <CardHeader>
-                <div className="mx-auto mb-4 p-3 bg-primary/10 rounded-full w-fit">
-                  <DoorOpen className="h-8 w-8 text-primary" />
-                </div>
-                <CardTitle>Study Rooms</CardTitle>
-                <CardDescription>
-                  Book comfortable study rooms for individual or group sessions
-                </CardDescription>
-              </CardHeader>
-            </Card>
+              <div className="flex-[0_0_100%] min-w-0 md:flex-[0_0_50%] lg:flex-[0_0_33.333%] pl-3 pr-3">
+                <Card className="text-center h-full">
+                  <CardHeader>
+                    <div className="mx-auto mb-4 p-3 bg-primary/10 rounded-full w-fit">
+                      <DoorOpen className="h-8 w-8 text-primary" />
+                    </div>
+                    <CardTitle>Study Rooms</CardTitle>
+                    <CardDescription>
+                      Book comfortable study rooms for individual or group sessions
+                    </CardDescription>
+                  </CardHeader>
+                </Card>
+              </div>
 
-            <Card className="text-center">
-              <CardHeader>
-                <div className="mx-auto mb-4 p-3 bg-primary/10 rounded-full w-fit">
-                  <Clock className="h-8 w-8 text-primary" />
-                </div>
-                <CardTitle>Easy Borrowing</CardTitle>
-                <CardDescription>
-                  Simple and fast book borrowing system with automated tracking
-                </CardDescription>
-              </CardHeader>
-            </Card>
+              <div className="flex-[0_0_100%] min-w-0 md:flex-[0_0_50%] lg:flex-[0_0_33.333%] pl-3 pr-3">
+                <Card className="text-center h-full">
+                  <CardHeader>
+                    <div className="mx-auto mb-4 p-3 bg-primary/10 rounded-full w-fit">
+                      <Clock className="h-8 w-8 text-primary" />
+                    </div>
+                    <CardTitle>Easy Borrowing</CardTitle>
+                    <CardDescription>
+                      Simple and fast book borrowing system with automated tracking
+                    </CardDescription>
+                  </CardHeader>
+                </Card>
+              </div>
+
+              {/* Duplicate set for smooth infinite loop */}
+              <div className="flex-[0_0_100%] min-w-0 md:flex-[0_0_50%] lg:flex-[0_0_33.333%] pl-3 pr-3">
+                <Card className="text-center h-full">
+                  <CardHeader>
+                    <div className="mx-auto mb-4 p-3 bg-primary/10 rounded-full w-fit">
+                      <BookOpen className="h-8 w-8 text-primary" />
+                    </div>
+                    <CardTitle>Vast Collection</CardTitle>
+                    <CardDescription>
+                      Access thousands of books across multiple categories and
+                      genres
+                    </CardDescription>
+                  </CardHeader>
+                </Card>
+              </div>
+
+              <div className="flex-[0_0_100%] min-w-0 md:flex-[0_0_50%] lg:flex-[0_0_33.333%] pl-3 pr-3">
+                <Card className="text-center h-full">
+                  <CardHeader>
+                    <div className="mx-auto mb-4 p-3 bg-primary/10 rounded-full w-fit">
+                      <DoorOpen className="h-8 w-8 text-primary" />
+                    </div>
+                    <CardTitle>Study Rooms</CardTitle>
+                    <CardDescription>
+                      Book comfortable study rooms for individual or group sessions
+                    </CardDescription>
+                  </CardHeader>
+                </Card>
+              </div>
+
+              <div className="flex-[0_0_100%] min-w-0 md:flex-[0_0_50%] lg:flex-[0_0_33.333%] pl-3 pr-3">
+                <Card className="text-center h-full">
+                  <CardHeader>
+                    <div className="mx-auto mb-4 p-3 bg-primary/10 rounded-full w-fit">
+                      <Clock className="h-8 w-8 text-primary" />
+                    </div>
+                    <CardTitle>Easy Borrowing</CardTitle>
+                    <CardDescription>
+                      Simple and fast book borrowing system with automated tracking
+                    </CardDescription>
+                  </CardHeader>
+                </Card>
+              </div>
+            </div>
           </div>
         </div>
       </section>
