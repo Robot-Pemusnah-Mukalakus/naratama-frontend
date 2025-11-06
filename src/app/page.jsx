@@ -64,16 +64,24 @@ export default function Home() {
   return (
     <div className="flex flex-col">
       {/* Hero Section */}
-      <section className="bg-linear-to-b from-zinc-50 to-white dark:from-zinc-900 dark:to-black py-20">
-        <div className="container mx-auto px-4">
+      <section 
+        className="relative py-20 bg-cover bg-center"
+        style={{
+          backgroundImage: "url('/library.jpg')",
+        }}
+      >
+        {/* Blurry white overlay */}
+        <div className="absolute inset-0 bg-white/10 backdrop-blur-sm"></div>
+        
+        <div className="container mx-auto px-4 relative z-10">
           <div className="max-w-3xl mx-auto text-center">
             <div className="inline-flex items-center justify-center p-3 bg-primary/10 rounded-full mb-6">
-              <Library className="h-12 w-12 text-primary" />
+              <Library className="h-12 w-12 text-white" />
             </div>
-            <h1 className="text-5xl font-bold mb-6 tracking-tight">
+            <h1 className="text-5xl font-extrabold mb-6 tracking-tight text-white">
               Welcome to Naratama Library
             </h1>
-            <p className="text-xl text-muted-foreground mb-8">
+            <p className="text-xl font-semibold text-white mb-8">
               Your gateway to knowledge. Browse thousands of books, book study
               rooms, and stay updated with our latest news.
             </p>
