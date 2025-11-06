@@ -78,22 +78,22 @@ export default function Home() {
             <div className="inline-flex items-center justify-center p-3 bg-primary/10 rounded-full mb-6">
               <Library className="h-12 w-12 text-white" />
             </div>
-            <h1 className="text-5xl font-extrabold mb-6 tracking-tight text-white">
+            <h1 className="text-5xl font-extrabold mb-6 tracking-tight text-white drop-shadow-2xl">
               Welcome to Naratama Library
             </h1>
-            <p className="text-xl font-semibold text-white mb-8">
+            <p className="text-xl font-semibold text-white drop-shadow-2xl mb-8">
               Your gateway to knowledge. Browse thousands of books, book study
               rooms, and stay updated with our latest news.
             </p>
             <div className="flex gap-4 justify-center">
               <Link href="/books">
-                <Button size="lg" className="gap-2">
+                <Button size="lg" className="gap-2 transition-transform duration-300 hover:scale-110">
                   <BookOpen className="h-5 w-5" />
                   Browse Books
                 </Button>
               </Link>
               <Link href="/rooms">
-                <Button size="lg" variant="outline" className="gap-2">
+                <Button size="lg" variant="outline" className="gap-2 transition-transform duration-300 hover:scale-110">
                   <DoorOpen className="h-5 w-5" />
                   Book a Room
                 </Button>
