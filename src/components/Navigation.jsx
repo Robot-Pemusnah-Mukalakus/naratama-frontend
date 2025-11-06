@@ -33,7 +33,7 @@ export default function Navigation() {
   };
 
   const navLinks = [
-    { href: "/", label: "Home", icon: Home },
+    { href: "/" , label: "Home", icon: Home },
     { href: "/books", label: "Books", icon: BookOpen },
     { href: "/announcements", label: "Announcements", icon: Bell },
     { href: "/rooms", label: "Rooms", icon: DoorOpen },
@@ -70,7 +70,7 @@ export default function Navigation() {
                   <Link key={link.href} href={link.href}>
                     <Button
                       variant={isActive ? "secondary" : "ghost"}
-                      className="gap-2"
+                      className="gap-2 transition-transform duration-300 hover:scale-110"
                     >
                       <Icon className="h-4 w-4" />
                       {link.label}
@@ -129,10 +129,10 @@ export default function Navigation() {
             ) : (
               <div className="flex items-center gap-2">
                 <Link href="/auth/login">
-                  <Button variant="outline">Login</Button>
+                  <Button variant="outline" className="gap-2 transition-transform duration-300 hover:scale-110">Login</Button>
                 </Link>
                 <Link href="/auth/register">
-                  <Button>Register</Button>
+                  <Button className="gap-2 transition-transform duration-300 hover:scale-110">Register</Button>
                 </Link>
               </div>
             )}
