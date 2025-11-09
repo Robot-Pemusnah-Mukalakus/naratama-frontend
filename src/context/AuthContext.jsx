@@ -16,8 +16,8 @@ export function AuthProvider({ children }) {
   const checkAuth = async () => {
     try {
       const response = await authService.getProfile();
-      if (response.success && response.data) {
-        setUser(response.data);
+      if (response.success && response.user) {
+        setUser(response.user);
       }
     } catch (error) {
       console.error("Auth check failed:", error);
@@ -30,8 +30,8 @@ export function AuthProvider({ children }) {
   const login = async (credentials) => {
     try {
       const response = await authService.login(credentials);
-      if (response.success && response.data) {
-        setUser(response.data);
+      if (response.success && response.user) {
+        setUser(response.user);
         return { success: true };
       }
       return { success: false, message: "Login failed" };
@@ -43,8 +43,8 @@ export function AuthProvider({ children }) {
   const register = async (userData) => {
     try {
       const response = await authService.register(userData);
-      if (response.success && response.data) {
-        setUser(response.data);
+      if (response.success && response.user) {
+        setUser(response.user);
         return { success: true };
       }
       return { success: false, message: "Registration failed" };
