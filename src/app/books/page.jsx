@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { booksService } from "@/lib/api";
 import {
   Card,
@@ -187,6 +188,17 @@ export default function BooksPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {books.map((book) => (
               <Card key={book.id} className="flex flex-col">
+                {book.coverImage && (
+                  <div className="relative w-full aspect-3/4 overflow-hidden rounded-t-lg bg-muted">
+                    <Image
+                      src={book.coverImage}
+                      alt={`Cover of ${book.title}`}
+                      fill
+                      className="object-cover"
+                      sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                    />
+                  </div>
+                )}
                 <CardHeader>
                   <CardTitle className="line-clamp-2">{book.title}</CardTitle>
                   <CardDescription>{book.author}</CardDescription>

@@ -25,6 +25,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import Link from "next/link";
+import Image from "next/image";
 
 export default function BookDetailPage() {
   const params = useParams();
@@ -103,7 +104,9 @@ export default function BookDetailPage() {
                 <div className="flex-1">
                   <CardTitle className="text-3xl mb-2">{book.title}</CardTitle>
                   <CardDescription className="text-lg">
-                    {book.author}
+                    {Array.isArray(book.author)
+                      ? book.author.join(", ")
+                      : book.author}
                   </CardDescription>
                 </div>
                 <Badge
@@ -114,6 +117,17 @@ export default function BookDetailPage() {
               </div>
             </CardHeader>
             <CardContent className="space-y-6">
+              {book.coverImage && (
+                <div className="w-full aspect-3/4 max-w-sm mx-auto relative overflow-hidden rounded-lg border bg-muted">
+                  <Image
+                    src={book.coverImage}
+                    alt={`Cover of ${book.title}`}
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                  />
+                </div>
+              )}
               <div>
                 <h3 className="font-semibold mb-2">Description</h3>
                 <p className="text-muted-foreground">
@@ -136,7 +150,11 @@ export default function BookDetailPage() {
                   <div className="flex items-center gap-2">
                     <BookOpen className="h-4 w-4 text-muted-foreground" />
                     <span className="text-sm font-medium">Category:</span>
-                    <Badge variant="secondary">{book.category}</Badge>
+                    <Badge variant="secondary">
+                      {Array.isArray(book.category)
+                        ? book.category.join(", ")
+                        : book.category}
+                    </Badge>
                   </div>
                   <div className="flex items-center gap-2">
                     <Calendar className="h-4 w-4 text-muted-foreground" />
@@ -152,7 +170,9 @@ export default function BookDetailPage() {
                     <Globe className="h-4 w-4 text-muted-foreground" />
                     <span className="text-sm font-medium">Publisher:</span>
                     <span className="text-sm text-muted-foreground">
-                      {book.publisher}
+                      {Array.isArray(book.publisher)
+                        ? book.publisher.join(", ")
+                        : book.publisher}
                     </span>
                   </div>
                   <div className="flex items-center gap-2">
@@ -167,7 +187,9 @@ export default function BookDetailPage() {
                       <Globe className="h-4 w-4 text-muted-foreground" />
                       <span className="text-sm font-medium">Language:</span>
                       <span className="text-sm text-muted-foreground">
-                        {book.language}
+                        {Array.isArray(book.language)
+                          ? book.language.join(", ")
+                          : book.language}
                       </span>
                     </div>
                   )}
@@ -179,7 +201,11 @@ export default function BookDetailPage() {
                   <Separator />
                   <div>
                     <h3 className="font-semibold mb-2">Genre</h3>
-                    <Badge variant="outline">{book.genre}</Badge>
+                    <Badge variant="outline">
+                      {Array.isArray(book.genre)
+                        ? book.genre.join(", ")
+                        : book.genre}
+                    </Badge>
                   </div>
                 </>
               )}
@@ -213,7 +239,11 @@ export default function BookDetailPage() {
                 {book.location && (
                   <div className="flex justify-between">
                     <span className="text-sm font-medium">Location:</span>
-                    <span className="text-sm">{book.location}</span>
+                    <span className="text-sm">
+                      {Array.isArray(book.location)
+                        ? book.location.join(", ")
+                        : book.location}
+                    </span>
                   </div>
                 )}
               </div>
