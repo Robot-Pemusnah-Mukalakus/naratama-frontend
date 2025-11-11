@@ -34,9 +34,17 @@ export function AuthProvider({ children }) {
         setUser(response.user);
         return { success: true };
       }
-      return { success: false, message: "Login failed" };
+      return {
+        success: false,
+        message: response.message || "Login failed",
+        errors: response.errors || [],
+      };
     } catch (error) {
-      return { success: false, message: error.message };
+      return {
+        success: false,
+        message: error.message,
+        errors: error.errors || [],
+      };
     }
   };
 
@@ -47,9 +55,25 @@ export function AuthProvider({ children }) {
         setUser(response.user);
         return { success: true };
       }
-      return { success: false, message: "Registration failed" };
+      if (response.errors) {
+        return {
+          success: "false",
+          message: response.message || "Registration failed",
+          errors: response.errors,
+        };
+      }
+      return {
+        success: "false",
+        message: response || "Registration failed",
+        errors: response.errors || [],
+      };
     } catch (error) {
-      return { success: false, message: error.message };
+      console.log("error", error);
+      return {
+        success: false,
+        message: error.message,
+        errors: error.errors || [],
+      };
     }
   };
 
