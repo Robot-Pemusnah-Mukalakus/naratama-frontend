@@ -63,7 +63,16 @@ export default function RegisterPage() {
         setError(result.message || "Registration failed");
       }
     } catch (err) {
-      setError(err.message || "An error occurred during registration");
+      if (
+        err &&
+        err.errors &&
+        Array.isArray(err.errors) &&
+        err.message === "Validation error"
+      ) {
+        setError(err.errors.map((e) => `${e.field}: ${e.message}`).join("\n"));
+      } else {
+        setError(err.message || "An error occurred during registration");
+      }
     } finally {
       setLoading(false);
     }
