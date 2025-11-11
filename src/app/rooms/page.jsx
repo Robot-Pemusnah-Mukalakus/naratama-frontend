@@ -73,10 +73,25 @@ export default function RoomsPage() {
     e.preventDefault();
 
     try {
+      // Convert date and time to ISO format
+      const bookingDate = new Date(
+        bookingForm.bookingDate + "T00:00:00"
+      ).toISOString();
+      const startTime = new Date(
+        bookingForm.bookingDate + "T" + bookingForm.startTime + ":00"
+      ).toISOString();
+      const endTime = new Date(
+        bookingForm.bookingDate + "T" + bookingForm.endTime + ":00"
+      ).toISOString();
+
       const bookingData = {
         userId: user.id,
         roomId: selectedRoom.id,
-        ...bookingForm,
+        bookingDate: bookingDate,
+        startTime: startTime,
+        endTime: endTime,
+        purpose: bookingForm.purpose,
+        specialRequests: bookingForm.specialRequests || undefined,
       };
 
       const response = await roomsService.createBooking(bookingData);
