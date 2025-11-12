@@ -68,6 +68,10 @@ export const authService = {
   changePassword: (passwords) =>
     apiClient.post("/api/auth/change-password", passwords),
   setPassword: (data) => apiClient.post("/api/auth/set-password", data),
+  // Google OAuth - redirects to Google login page
+  googleLogin: () => {
+    window.location.href = `${API_BASE_URL}/api/auth/google`;
+  },
 };
 
 // Books Service

@@ -87,6 +87,11 @@ export function AuthProvider({ children }) {
     }
   };
 
+  const googleLogin = () => {
+    // This will redirect the user to Google OAuth page
+    authService.googleLogin();
+  };
+
   const isAuthenticated = !!user;
   const isAdmin = user?.role === "ADMIN";
   const isStaff = user?.role === "STAFF" || user?.role === "ADMIN";
@@ -102,6 +107,7 @@ export function AuthProvider({ children }) {
         login,
         register,
         logout,
+        googleLogin,
         checkAuth,
       }}
     >
