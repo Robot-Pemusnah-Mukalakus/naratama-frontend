@@ -47,23 +47,27 @@ export default function RegisterPage() {
       return;
     }
 
-    if (formData.password.length < 6) {
-      setError("Password must be at least 6 characters long");
-      setLoading(false);
-      return;
-    }
-
     try {
       const { confirmPassword, ...registerData } = formData;
       const result = await register(registerData);
+      console.log("result", result);
       if (result.success) {
         toast.success("Registration successful! Welcome to Naratama Library");
         router.push("/dashboard");
+      } else if (
+        result &&
+        result.errors &&
+        Array.isArray(result.errors) &&
+        result.message === "Validation error"
+      ) {
+        setError(
+          result.errors.map((e) => `${e.field}: ${e.message}`).join("---")
+        );
       } else {
         setError(result.message || "Registration failed");
       }
     } catch (err) {
-      setError(err.message || "An error occurred during registration");
+      setError("An error occurred during registration");
     } finally {
       setLoading(false);
     }
