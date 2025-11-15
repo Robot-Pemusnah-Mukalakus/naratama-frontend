@@ -5,7 +5,6 @@ import { announcementsService } from "@/lib/api";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -13,7 +12,8 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Bell, Calendar } from "lucide-react";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Bell, Calendar, BookOpen, ClipboardList, Wrench, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 
 const priorityColors = {
@@ -31,15 +31,32 @@ const typeLabels = {
   GENERAL: "General",
 };
 
+const typeIcons = {
+  NEW_BOOKS: BookOpen,
+  EVENT: Sparkles,
+  MAINTENANCE: Wrench,
+  POLICY: ClipboardList,
+  GENERAL: Bell,
+};
+
+const filterOptions = [
+  { value: "ALL", label: "All" },
+  { value: "EVENT", label: "Event" },
+  { value: "NEW_BOOKS", label: "New Books" },
+  { value: "POLICY", label: "Policy" },
+  { value: "MAINTENANCE", label: "Maintenance" },
+  { value: "GENERAL", label: "General" },
+];
+
 export default function AnnouncementsPage() {
   const [announcements, setAnnouncements] = useState([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [filter, setFilter] = useState("ALL");
 
   useEffect(() => {
     fetchAnnouncements();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page]);
 
   const fetchAnnouncements = async () => {
@@ -61,6 +78,11 @@ export default function AnnouncementsPage() {
     }
   };
 
+  const filteredAnnouncements =
+    filter === "ALL"
+      ? announcements
+      : announcements.filter((a) => a.type === filter);
+
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString("en-US", {
       year: "numeric",
@@ -78,6 +100,27 @@ export default function AnnouncementsPage() {
         </p>
       </div>
 
+      {/* Filter Tabs */}
+      <Tabs value={filter} onValueChange={setFilter} className="mb-6">
+        <TabsList className="w-full py-1 flex overflow-x-auto no-scrollbar gap-2 p-1 rounded-xl bg-secondary/30 border border-primary">
+          {filterOptions.map((opt) => {
+            const Icon =
+              opt.value !== "ALL" ? typeIcons[opt.value] : Bell;
+            return (
+              <TabsTrigger
+                key={opt.value}
+                value={opt.value}
+                className="flex items-center gap-2 px-4 py-3 rounded-xl"
+              >
+                <Icon className="h-4 w-4" />
+                {opt.label}
+              </TabsTrigger>
+            );
+          })}
+        </TabsList>
+      </Tabs>
+
+      {/* Loading Skeleton */}
       {loading ? (
         <div className="space-y-4">
           {[...Array(5)].map((_, i) => (
@@ -92,52 +135,58 @@ export default function AnnouncementsPage() {
             </Card>
           ))}
         </div>
-      ) : announcements.length === 0 ? (
+      ) : filteredAnnouncements.length === 0 ? (
         <Alert>
           <Bell className="h-4 w-4" />
           <AlertDescription>
-            No announcements available at the moment. Check back later for
-            updates!
+            No announcements found for this filter.
           </AlertDescription>
         </Alert>
       ) : (
         <>
           <div className="space-y-4">
-            {announcements.map((announcement) => (
-              <Card key={announcement.id}>
-                <CardHeader>
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="flex-1">
-                      <CardTitle className="mb-2">
-                        {announcement.title}
-                      </CardTitle>
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <Badge variant={priorityColors[announcement.priority]}>
-                          {announcement.priority}
-                        </Badge>
-                        <Badge variant="outline">
-                          {typeLabels[announcement.type] || announcement.type}
-                        </Badge>
-                        {announcement.targetAudience && (
-                          <Badge variant="secondary">
-                            {announcement.targetAudience.replace("_", " ")}
-                          </Badge>
-                        )}
+            {filteredAnnouncements.map((announcement) => {
+              const TypeIcon = typeIcons[announcement.type] || Bell;
+
+              return (
+                <div
+                  key={announcement.id}
+                  className="transform transition duration-200 ease-out hover:-translate-y-1"
+                >
+                  <Card>
+                    <CardHeader>
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="flex-1">
+                          <CardTitle className="mb-2 flex items-center gap-2">
+                            <TypeIcon className="h-5 w-5 text-primary" />
+                            {announcement.title}
+                          </CardTitle>
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <Badge variant={priorityColors[announcement.priority]}>
+                              {announcement.priority}
+                            </Badge>
+                            {announcement.type !== "ALL" && (
+                            <Badge variant="outline">
+                            {typeLabels[announcement.type] || announcement.type}
+                            </Badge>
+                          )}  
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                          <Calendar className="h-4 w-4" />
+                          <span>{formatDate(announcement.createdAt)}</span>
+                        </div>
                       </div>
-                    </div>
-                    <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                      <Calendar className="h-4 w-4" />
-                      <span>{formatDate(announcement.createdAt)}</span>
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-muted-foreground whitespace-pre-wrap">
-                    {announcement.content}
-                  </p>
-                </CardContent>
-              </Card>
-            ))}
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-muted-foreground whitespace-pre-wrap">
+                        {announcement.content}
+                      </p>
+                    </CardContent>
+                  </Card>
+                </div>
+              );
+            })}
           </div>
 
           {totalPages > 1 && (
