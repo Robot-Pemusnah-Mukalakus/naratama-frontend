@@ -1,5 +1,7 @@
 "use client";
 
+export const dynamic = "force-dynamic";
+
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
@@ -13,8 +15,8 @@ export default function SuccessPage() {
   useEffect(() => {
     const authenticateUser = async () => {
       try {
-
-        // const errorParam = searchParams.get("error");
+        // Check for error in URL params
+        const errorParam = searchParams.get("error");
         if (errorParam) {
           setError(decodeURIComponent(errorParam));
           setTimeout(() => {
@@ -42,7 +44,7 @@ export default function SuccessPage() {
     };
 
     authenticateUser();
-  }, [checkAuth, router]);
+  }, [checkAuth, router, searchParams]);
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen gap-4">
