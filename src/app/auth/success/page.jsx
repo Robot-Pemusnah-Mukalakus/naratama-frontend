@@ -13,8 +13,8 @@ export default function SuccessPage() {
   useEffect(() => {
     const authenticateUser = async () => {
       try {
-        // Check for error in URL params
-        const errorParam = searchParams.get("error");
+
+        // const errorParam = searchParams.get("error");
         if (errorParam) {
           setError(decodeURIComponent(errorParam));
           setTimeout(() => {
