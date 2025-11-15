@@ -17,7 +17,7 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
-import { authService } from "@/lib/api";
+import { authService, usersService } from "@/lib/api";
 import { toast } from "sonner";
 
 export default function ProfilePage() {
@@ -60,9 +60,14 @@ export default function ProfilePage() {
   const handleProfileUpdate = async (e) => {
     e.preventDefault();
     try {
-      await authService.changePassword(passwordData);
+      await usersService.updateUser(user.id, {
+        name: profileData.name,
+        email: profileData.email,
+      });
       toast.success("Profile updated successfully");
       setEditing(false);
+      // Refresh user data
+      window.location.reload();
     } catch (error) {
       toast.error(error.message || "Failed to update profile");
     }
@@ -117,182 +122,216 @@ export default function ProfilePage() {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="mb-8">
-        <h1 className="text-4xl font-bold mb-2">My Profile</h1>
-        <p className="text-muted-foreground">Manage your account information</p>
-      </div>
+      <div className="max-w-3xl mx-auto">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-stone-800 dark:text-stone-100">Profile Settings</h1>
+          <p className="text-stone-600 dark:text-stone-400 mt-1">Manage your library account</p>
+        </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 space-y-6">
-          {/* Profile Information */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Profile Information</CardTitle>
-              <CardDescription>
-                View and update your personal details
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center gap-4 pb-4">
-                <Avatar className="h-20 w-20">
-                  <AvatarFallback className="text-2xl">
-                    {getInitials(user.name)}
-                  </AvatarFallback>
-                </Avatar>
-                <div>
-                  <h3 className="text-2xl font-semibold">{user.name}</h3>
-                  <p className="text-muted-foreground">{user.email}</p>
-                  <Badge className="mt-2">{user.role}</Badge>
-                </div>
+        {/* Profile Info Card */}
+        <Card className="mb-6 border-l-4 border-l-slate-700 shadow-sm bg-gradient-to-br from-white to-slate-50/50 dark:from-slate-900 dark:to-slate-950/20">
+          <CardHeader className="bg-gradient-to-r from-slate-100/60 via-gray-100/40 to-zinc-100/30 dark:from-slate-900/60 dark:via-gray-900/40 dark:to-zinc-900/30">
+            <div className="flex items-center gap-4">
+              <Avatar className="h-20 w-20 ring-2 ring-slate-300 ring-offset-2 dark:ring-slate-700">
+                <AvatarFallback className="text-2xl bg-gradient-to-br from-slate-700 via-gray-800 to-zinc-800 text-white font-semibold">
+                  {getInitials(user.name)}
+                </AvatarFallback>
+              </Avatar>
+              <div className="flex-1">
+                <CardTitle className="text-2xl text-slate-800 dark:text-slate-100">{user.name}</CardTitle>
+                <CardDescription className="flex items-center gap-2 mt-1.5 text-slate-600 dark:text-slate-400">
+                  {user.email}
+                </CardDescription>
+                <Badge className="mt-2 bg-slate-100 text-slate-700 hover:bg-slate-200 border-slate-300 dark:bg-slate-800 dark:text-slate-200 dark:border-slate-700">
+                  {user.role}
+                </Badge>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid gap-4">
+              {/* Full Name */}
+              <div className="space-y-2">
+                <Label htmlFor="name">Full Name</Label>
+                <Input
+                  id="name"
+                  value={profileData.name}
+                  onChange={(e) =>
+                    setProfileData({ ...profileData, name: e.target.value })
+                  }
+                  disabled={!editing}
+                  className={!editing ? "bg-muted" : ""}
+                />
               </div>
 
-              <Separator />
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <Label className="text-muted-foreground">Email</Label>
-                  <p className="font-medium">{user.email}</p>
-                </div>
-                <div>
-                  <Label className="text-muted-foreground">Phone Number</Label>
-                  <p className="font-medium">
-                    {user.phoneNumber || "Not provided"}
-                  </p>
-                </div>
-                <div>
-                  <Label className="text-muted-foreground">Role</Label>
-                  <p className="font-medium">{user.role}</p>
-                </div>
-                <div>
-                  <Label className="text-muted-foreground">
-                    Account Status
-                  </Label>
-                  <p className="font-medium">
-                    {user.isActive ? (
-                      <Badge variant="default">Active</Badge>
-                    ) : (
-                      <Badge variant="destructive">Inactive</Badge>
-                    )}
-                  </p>
-                </div>
+              {/* Email */}
+              <div className="space-y-2">
+                <Label htmlFor="email">Email Address</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  value={profileData.email}
+                  onChange={(e) =>
+                    setProfileData({ ...profileData, email: e.target.value })
+                  }
+                  disabled={!editing}
+                  className={!editing ? "bg-muted" : ""}
+                />
               </div>
-            </CardContent>
-          </Card>
 
-          {/* Change Password */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Change Password</CardTitle>
-              <CardDescription>Update your account password</CardDescription>
-            </CardHeader>
-            <CardContent>
-              {!changingPassword ? (
-                <Button onClick={() => setChangingPassword(true)}>
-                  Change Password
+              {/* Phone Number */}
+              <div className="space-y-2">
+                <Label htmlFor="phone">Phone Number</Label>
+                <Input
+                  id="phone"
+                  value={user.phoneNumber || "Not provided"}
+                  disabled
+                  className="bg-muted"
+                />
+                <p className="text-xs text-muted-foreground">
+                  Contact admin to update phone number
+                </p>
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex gap-3 pt-4">
+              {!editing ? (
+                <Button onClick={() => setEditing(true)} className="bg-gradient-to-r from-slate-700 via-gray-800 to-zinc-800 hover:from-slate-800 hover:via-gray-900 hover:to-zinc-900 text-white shadow-sm">
+                  <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                  </svg>
+                  Edit Profile
                 </Button>
               ) : (
-                <form onSubmit={handlePasswordChange} className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="currentPassword">Current Password</Label>
-                    <Input
-                      id="currentPassword"
-                      type="password"
-                      value={passwordData.currentPassword}
-                      onChange={(e) =>
-                        setPasswordData({
-                          ...passwordData,
-                          currentPassword: e.target.value,
-                        })
-                      }
-                      required
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="newPassword">New Password</Label>
-                    <Input
-                      id="newPassword"
-                      type="password"
-                      value={passwordData.newPassword}
-                      onChange={(e) =>
-                        setPasswordData({
-                          ...passwordData,
-                          newPassword: e.target.value,
-                        })
-                      }
-                      required
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="confirmPassword">
-                      Confirm New Password
-                    </Label>
-                    <Input
-                      id="confirmPassword"
-                      type="password"
-                      value={passwordData.confirmPassword}
-                      onChange={(e) =>
-                        setPasswordData({
-                          ...passwordData,
-                          confirmPassword: e.target.value,
-                        })
-                      }
-                      required
-                    />
-                  </div>
-                  <div className="flex gap-2">
-                    <Button type="submit">Update Password</Button>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => {
-                        setChangingPassword(false);
-                        setPasswordData({
-                          currentPassword: "",
-                          newPassword: "",
-                          confirmPassword: "",
-                        });
-                      }}
-                    >
-                      Cancel
-                    </Button>
-                  </div>
-                </form>
+                <>
+                  <Button onClick={handleProfileUpdate} className="bg-gradient-to-r from-emerald-700 to-teal-700 hover:from-emerald-800 hover:to-teal-800 text-white shadow-sm">
+                    <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                    Save Changes
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="border-slate-300 text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-900"
+                    onClick={() => {
+                      setEditing(false);
+                      setProfileData({
+                        name: user.name || "",
+                        email: user.email || "",
+                      });
+                    }}
+                  >
+                    Cancel
+                  </Button>
+                </>
               )}
-            </CardContent>
-          </Card>
-        </div>
+            </div>
+          </CardContent>
+        </Card>
 
-        {/* Quick Actions */}
-        <div>
-          <Card>
-            <CardHeader>
-              <CardTitle>Quick Actions</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2">
+        {/* Security Card */}
+        <Card className="border-l-4 border-l-stone-600 shadow-sm bg-gradient-to-br from-white to-stone-50/30 dark:from-stone-900 dark:to-stone-950/20">
+          <CardHeader className="bg-gradient-to-r from-stone-50/50 to-neutral-50/30 dark:from-stone-950/30 dark:to-neutral-950/20">
+            <div className="flex items-center gap-3">
+              <div className="p-2.5 bg-gradient-to-br from-stone-600 to-stone-800 rounded-lg shadow-sm">
+                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                </svg>
+              </div>
+              <div>
+                <CardTitle className="text-stone-800 dark:text-stone-100">Security</CardTitle>
+                <CardDescription className="text-stone-600 dark:text-stone-400">
+                  Manage your password and security settings
+                </CardDescription>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent>
+            {!changingPassword ? (
               <Button
                 variant="outline"
-                className="w-full justify-start"
-                asChild
+                onClick={() => setChangingPassword(true)}
+                className="border-stone-300 text-stone-700 hover:bg-stone-50 hover:text-stone-800 dark:border-stone-700 dark:text-stone-300 dark:hover:bg-stone-900"
               >
-                <a href="/dashboard">View Dashboard</a>
+                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
+                </svg>
+                Change Password
               </Button>
-              <Button
-                variant="outline"
-                className="w-full justify-start"
-                asChild
-              >
-                <a href="/books">Browse Books</a>
-              </Button>
-              <Button
-                variant="outline"
-                className="w-full justify-start"
-                asChild
-              >
-                <a href="/rooms">Book a Room</a>
-              </Button>
-            </CardContent>
-          </Card>
-        </div>
+            ) : (
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="currentPassword">Current Password</Label>
+                  <Input
+                    id="currentPassword"
+                    type="password"
+                    value={passwordData.currentPassword}
+                    onChange={(e) =>
+                      setPasswordData({
+                        ...passwordData,
+                        currentPassword: e.target.value,
+                      })
+                    }
+                    placeholder="Enter current password"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="newPassword">New Password</Label>
+                  <Input
+                    id="newPassword"
+                    type="password"
+                    value={passwordData.newPassword}
+                    onChange={(e) =>
+                      setPasswordData({
+                        ...passwordData,
+                        newPassword: e.target.value,
+                      })
+                    }
+                    placeholder="Enter new password"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="confirmPassword">Confirm New Password</Label>
+                  <Input
+                    id="confirmPassword"
+                    type="password"
+                    value={passwordData.confirmPassword}
+                    onChange={(e) =>
+                      setPasswordData({
+                        ...passwordData,
+                        confirmPassword: e.target.value,
+                      })
+                    }
+                    placeholder="Confirm new password"
+                  />
+                </div>
+                <div className="flex gap-3 pt-2">
+                  <Button onClick={handlePasswordChange} className="bg-gradient-to-r from-stone-700 to-stone-800 hover:from-stone-800 hover:to-stone-900 text-white shadow-sm">
+                    <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    Update Password
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="border-stone-300 text-stone-700 hover:bg-stone-50 dark:border-stone-700 dark:text-stone-300 dark:hover:bg-stone-900"
+                    onClick={() => {
+                      setChangingPassword(false);
+                      setPasswordData({
+                        currentPassword: "",
+                        newPassword: "",
+                        confirmPassword: "",
+                      });
+                    }}
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
