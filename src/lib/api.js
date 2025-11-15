@@ -81,9 +81,7 @@ export const booksService = {
   getNewBooks: (limit = 10) => apiClient.get(`/api/books/new?limit=${limit}`),
   searchBooks: (params = {}) => {
     const query = new URLSearchParams(params).toString();
-    return apiClient.get(
-      `/api/books-advanced/search${query ? `?${query}` : ""}`
-    );
+    return apiClient.get(`/api/books${query ? `?${query}` : ""}`);
   },
   createBook: (bookData) => apiClient.post("/api/books", bookData),
   updateBook: (id, bookData) => apiClient.put(`/api/books/${id}`, bookData),

@@ -94,7 +94,7 @@ export default function BooksPage() {
     setLoading(true);
     try {
       const response = await booksService.searchBooks({
-        q: search,
+        search: search,
         page,
         limit: 12,
         available: availableOnly ? "true" : undefined,
