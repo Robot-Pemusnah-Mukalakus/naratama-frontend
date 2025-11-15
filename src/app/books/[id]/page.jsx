@@ -130,8 +130,11 @@ export default function BookDetailPage() {
                       {book.title}
                     </h1>
                     <Badge
-                      variant={book.availableQuantity > 0 ? "default" : "secondary"}
-                      className="shrink-0"
+                      className={`shrink-0 ${
+                        book.availableQuantity > 0 
+                          ? "bg-green-600 hover:bg-green-700 text-white" 
+                          : "bg-red-600 hover:bg-red-700 text-white"
+                      }`}
                     >
                       {book.availableQuantity > 0 ? "Available" : "Not Available"}
                     </Badge>
@@ -142,14 +145,14 @@ export default function BookDetailPage() {
                       : book.author}
                   </p>
                   <div className="flex flex-wrap gap-2">
-                    <Badge variant="secondary" className="text-xs">
+                    <Badge className="text-xs bg-blue-100 text-blue-700 hover:bg-blue-200 dark:bg-blue-950 dark:text-blue-300">
                       <BookOpen className="h-3 w-3 mr-1" />
                       {Array.isArray(book.category)
                         ? book.category.join(", ")
                         : book.category}
                     </Badge>
                     {book.genre && (
-                      <Badge variant="outline" className="text-xs">
+                      <Badge className="text-xs bg-gradient-to-r from-slate-100 via-gray-50 to-zinc-100 text-slate-700 hover:from-slate-200 hover:via-gray-100 hover:to-zinc-200 dark:from-slate-800 dark:via-gray-900 dark:to-zinc-800 dark:text-slate-200 border border-slate-300 dark:border-slate-700">
                         {Array.isArray(book.genre)
                           ? book.genre.join(", ")
                           : book.genre}
@@ -238,11 +241,7 @@ export default function BookDetailPage() {
                 {/* Availability Section */}
                 <div>
                   <h3 className="text-sm font-semibold mb-3">Availability</h3>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
-                    <div className="text-center p-3 rounded-lg bg-muted/50">
-                      <p className="text-xl font-bold">{book.quantity}</p>
-                      <p className="text-xs text-muted-foreground">Total Copies</p>
-                    </div>
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-4">
                     <div className="text-center p-3 rounded-lg bg-muted/50">
                       <p className={`text-xl font-bold ${
                         book.availableQuantity > 0 ? "text-green-600" : "text-red-600"
