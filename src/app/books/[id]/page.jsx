@@ -30,7 +30,7 @@ import Image from "next/image";
 export default function BookDetailPage() {
   const params = useParams();
   const router = useRouter();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
   const [book, setBook] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -90,188 +90,207 @@ export default function BookDetailPage() {
       <Button
         variant="ghost"
         onClick={() => router.push("/books")}
-        className="mb-6"
+        className="mb-6 hover:bg-accent"
       >
         <ArrowLeft className="h-4 w-4 mr-2" />
         Back to Books
       </Button>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2">
-          <Card>
-            <CardHeader>
-              <div className="flex items-start justify-between">
-                <div className="flex-1">
-                  <CardTitle className="text-3xl mb-2">{book.title}</CardTitle>
-                  <CardDescription className="text-lg">
-                    {Array.isArray(book.author)
-                      ? book.author.join(", ")
-                      : book.author}
-                  </CardDescription>
-                </div>
-                <Badge
-                  variant={book.availableQuantity > 0 ? "default" : "secondary"}
-                >
-                  {book.availableQuantity > 0 ? "Available" : "Not Available"}
-                </Badge>
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              {book.coverImage && (
-                <div className="w-full aspect-3/4 max-w-sm mx-auto relative overflow-hidden rounded-lg border bg-muted">
-                  <Image
-                    src={book.coverImage}
-                    alt={`Cover of ${book.title}`}
-                    fill
-                    className="object-cover"
-                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                  />
-                </div>
-              )}
-              <div>
-                <h3 className="font-semibold mb-2">Description</h3>
-                <p className="text-muted-foreground">
-                  {book.description ||
-                    "No description available for this book."}
-                </p>
-              </div>
-
-              <Separator />
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-3">
-                  <div className="flex items-center gap-2">
-                    <Hash className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-sm font-medium">ISBN:</span>
-                    <span className="text-sm text-muted-foreground">
-                      {book.isbn}
-                    </span>
+      <div className="space-y-6">
+        {/* Main Card: Cover + All Details */}
+        <Card>
+          <CardContent className="p-6">
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
+              {/* Book Cover - Left (Smaller) */}
+              <div className="md:col-span-2">
+                {book.coverImage ? (
+                  <div className="relative w-full aspect-[3/4] overflow-hidden rounded-lg shadow-md">
+                    <Image
+                      src={book.coverImage}
+                      alt={`Cover of ${book.title}`}
+                      fill
+                      className="object-contain"
+                      sizes="(max-width: 768px) 100vw, 200px"
+                      priority
+                    />
                   </div>
-                  <div className="flex items-center gap-2">
-                    <BookOpen className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-sm font-medium">Category:</span>
-                    <Badge variant="secondary">
-                      {Array.isArray(book.category)
-                        ? book.category.join(", ")
-                        : book.category}
-                    </Badge>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Calendar className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-sm font-medium">Published:</span>
-                    <span className="text-sm text-muted-foreground">
-                      {book.publishYear}
-                    </span>
-                  </div>
-                </div>
-
-                <div className="space-y-3">
-                  <div className="flex items-center gap-2">
-                    <Globe className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-sm font-medium">Publisher:</span>
-                    <span className="text-sm text-muted-foreground">
-                      {Array.isArray(book.publisher)
-                        ? book.publisher.join(", ")
-                        : book.publisher}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <FileText className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-sm font-medium">Pages:</span>
-                    <span className="text-sm text-muted-foreground">
-                      {book.pages}
-                    </span>
-                  </div>
-                  {book.language && (
-                    <div className="flex items-center gap-2">
-                      <Globe className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-sm font-medium">Language:</span>
-                      <span className="text-sm text-muted-foreground">
-                        {Array.isArray(book.language)
-                          ? book.language.join(", ")
-                          : book.language}
-                      </span>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {book.genre && (
-                <>
-                  <Separator />
-                  <div>
-                    <h3 className="font-semibold mb-2">Genre</h3>
-                    <Badge variant="outline">
-                      {Array.isArray(book.genre)
-                        ? book.genre.join(", ")
-                        : book.genre}
-                    </Badge>
-                  </div>
-                </>
-              )}
-            </CardContent>
-          </Card>
-        </div>
-
-        <div>
-          <Card>
-            <CardHeader>
-              <CardTitle>Availability</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <div className="flex justify-between">
-                  <span className="text-sm font-medium">Total Copies:</span>
-                  <span className="text-sm">{book.quantity}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-sm font-medium">Available:</span>
-                  <span
-                    className={`text-sm font-semibold ${
-                      book.availableQuantity > 0
-                        ? "text-green-600"
-                        : "text-red-600"
-                    }`}
-                  >
-                    {book.availableQuantity}
-                  </span>
-                </div>
-                {book.location && (
-                  <div className="flex justify-between">
-                    <span className="text-sm font-medium">Location:</span>
-                    <span className="text-sm">
-                      {Array.isArray(book.location)
-                        ? book.location.join(", ")
-                        : book.location}
-                    </span>
+                ) : (
+                  <div className="w-full aspect-[3/4] flex items-center justify-center bg-muted rounded-lg">
+                    <BookOpen className="h-12 w-12 text-muted-foreground" />
                   </div>
                 )}
               </div>
 
-              <Separator />
-
-              {isAuthenticated ? (
-                <Button
-                  className="w-full"
-                  disabled={book.availableQuantity === 0}
-                >
-                  {book.availableQuantity > 0
-                    ? "Request to Borrow"
-                    : "Currently Unavailable"}
-                </Button>
-              ) : (
-                <div className="space-y-2">
-                  <p className="text-sm text-muted-foreground text-center">
-                    Login to borrow this book
+              {/* Title, Description, Book Details & Availability - Right */}
+              <div className="md:col-span-10 space-y-4">
+                {/* Title & Author */}
+                <div>
+                  <div className="flex items-start justify-between gap-4 mb-2">
+                    <h1 className="text-3xl lg:text-4xl font-bold leading-tight">
+                      {book.title}
+                    </h1>
+                    <Badge
+                      className={`shrink-0 ${
+                        book.availableQuantity > 0 
+                          ? "bg-green-600 hover:bg-green-700 text-white" 
+                          : "bg-red-600 hover:bg-red-700 text-white"
+                      }`}
+                    >
+                      {book.availableQuantity > 0 ? "Available" : "Not Available"}
+                    </Badge>
+                  </div>
+                  <p className="text-lg text-muted-foreground mb-3">
+                    by {Array.isArray(book.author)
+                      ? book.author.join(", ")
+                      : book.author}
                   </p>
-                  <Link href="/auth/login" className="block">
-                    <Button className="w-full">Login</Button>
-                  </Link>
+                  <div className="flex flex-wrap gap-2">
+                    <Badge className="text-xs bg-blue-100 text-blue-700 hover:bg-blue-200 dark:bg-blue-950 dark:text-blue-300">
+                      <BookOpen className="h-3 w-3 mr-1" />
+                      {Array.isArray(book.category)
+                        ? book.category.join(", ")
+                        : book.category}
+                    </Badge>
+                    {book.genre && (
+                      <Badge className="text-xs bg-gradient-to-r from-slate-100 via-gray-50 to-zinc-100 text-slate-700 hover:from-slate-200 hover:via-gray-100 hover:to-zinc-200 dark:from-slate-800 dark:via-gray-900 dark:to-zinc-800 dark:text-slate-200 border border-slate-300 dark:border-slate-700">
+                        {Array.isArray(book.genre)
+                          ? book.genre.join(", ")
+                          : book.genre}
+                      </Badge>
+                    )}
+                  </div>
                 </div>
-              )}
-            </CardContent>
-          </Card>
-        </div>
+
+                <Separator />
+
+                {/* About this book */}
+                <div>
+                  <h3 className="text-sm font-semibold mb-2">About this book</h3>
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    {book.description ||
+                      "No description available for this book."}
+                  </p>
+                </div>
+
+                <Separator />
+
+                {/* Book Details Grid */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  <div className="flex items-start gap-3">
+                    <Hash className="h-4 w-4 text-muted-foreground mt-1 shrink-0" />
+                    <div>
+                      <p className="text-xs text-muted-foreground">ISBN</p>
+                      <p className="text-sm font-medium">{book.isbn}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <Calendar className="h-4 w-4 text-muted-foreground mt-1 shrink-0" />
+                    <div>
+                      <p className="text-xs text-muted-foreground">Published</p>
+                      <p className="text-sm font-medium">{book.publishYear}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <FileText className="h-4 w-4 text-muted-foreground mt-1 shrink-0" />
+                    <div>
+                      <p className="text-xs text-muted-foreground">Pages</p>
+                      <p className="text-sm font-medium">{book.pages}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <Globe className="h-4 w-4 text-muted-foreground mt-1 shrink-0" />
+                    <div>
+                      <p className="text-xs text-muted-foreground">Publisher</p>
+                      <p className="text-sm font-medium">
+                        {Array.isArray(book.publisher)
+                          ? book.publisher.join(", ")
+                          : book.publisher}
+                      </p>
+                    </div>
+                  </div>
+                  {book.language && (
+                    <div className="flex items-start gap-3">
+                      <Globe className="h-4 w-4 text-muted-foreground mt-1 shrink-0" />
+                      <div>
+                        <p className="text-xs text-muted-foreground">Language</p>
+                        <p className="text-sm font-medium">
+                          {Array.isArray(book.language)
+                            ? book.language.join(", ")
+                            : book.language}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                  {book.location && (
+                    <div className="flex items-start gap-3">
+                      <BookOpen className="h-4 w-4 text-muted-foreground mt-1 shrink-0" />
+                      <div>
+                        <p className="text-xs text-muted-foreground">Location</p>
+                        <p className="text-sm font-medium">
+                          {Array.isArray(book.location)
+                            ? book.location.join(", ")
+                            : book.location}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                <Separator />
+
+                {/* Availability Section */}
+                <div>
+                  <h3 className="text-sm font-semibold mb-3">Availability</h3>
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-4">
+                    <div className="text-center p-3 rounded-lg bg-muted/50">
+                      <p className={`text-xl font-bold ${
+                        book.availableQuantity > 0 ? "text-green-600" : "text-red-600"
+                      }`}>
+                        {book.availableQuantity}
+                      </p>
+                      <p className="text-xs text-muted-foreground">Available</p>
+                    </div>
+                    <div className="text-center p-3 rounded-lg bg-muted/50">
+                      <p className="text-xl font-bold">{book.quantity - book.availableQuantity}</p>
+                      <p className="text-xs text-muted-foreground">Borrowed</p>
+                    </div>
+                    {book.location && (
+                      <div className="text-center p-3 rounded-lg bg-muted/50">
+                        <p className="text-sm font-medium">
+                          {Array.isArray(book.location)
+                            ? book.location.join(", ")
+                            : book.location}
+                        </p>
+                        <p className="text-xs text-muted-foreground">Location</p>
+                      </div>
+                    )}
+                  </div>
+                  
+                  {/* Button at the bottom */}
+                  {isAuthenticated ? (
+                    <Button
+                      className="w-full"
+                      disabled={book.availableQuantity === 0}
+                    >
+                      {book.availableQuantity > 0
+                        ? "Request to Borrow"
+                        : "Currently Unavailable"}
+                    </Button>
+                  ) : (
+                    <div className="space-y-2">
+                      <p className="text-sm text-muted-foreground text-center">
+                        Please login to borrow this book
+                      </p>
+                      <Link href="/auth/login">
+                        <Button className="w-full">Login</Button>
+                      </Link>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

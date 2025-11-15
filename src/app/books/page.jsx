@@ -94,7 +94,7 @@ export default function BooksPage() {
     setLoading(true);
     try {
       const response = await booksService.searchBooks({
-        q: search,
+        search: search,
         page,
         limit: 12,
         available: availableOnly ? "true" : undefined,
@@ -112,59 +112,84 @@ export default function BooksPage() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="mb-8">
-        <h1 className="text-4xl font-bold mb-2">Book Catalog</h1>
-        <p className="text-muted-foreground">
-          Browse and search our collection of books
-        </p>
-      </div>
-
-      <div className="mb-6 space-y-4">
-        <div className="flex gap-2">
-          <div className="flex-1 flex gap-2">
-            <Input
-              placeholder="Search books by title, author, or ISBN..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-              className="flex-1"
-            />
-            <Button onClick={handleSearch}>
-              <Search className="h-4 w-4 mr-2" />
-              Search
-            </Button>
-          </div>
+    <div className="min-h-screen bg-background">
+      <div className="container mx-auto px-4 py-8">
+        {/* Header Section */}
+        <div className="mb-8">
+          <h1 className="text-4xl font-bold mb-2">Book Catalog</h1>
+          <p className="text-muted-foreground">
+            Browse and search our collection of books
+          </p>
         </div>
 
-        <div className="flex gap-4 items-center">
-          <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-            <SelectTrigger className="w-[200px]">
-              <SelectValue placeholder="Category" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Categories</SelectItem>
-              {categories.map((category) => (
-                <SelectItem key={category} value={category}>
-                  {category}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+        {/* Search and Filter Section */}
+        <Card className="mb-6">
+          <CardContent className="pt-6">
+            <div className="space-y-4">
+              {/* Search Bar */}
+              <div className="flex gap-2">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Search by title, author, or ISBN..."
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+                    className="pl-10"
+                  />
+                </div>
+                <Button onClick={handleSearch}>
+                  <Search className="h-4 w-4 mr-2" />
+                  Search
+                </Button>
+              </div>
 
-          <Button
-            variant={availableOnly ? "default" : "outline"}
-            onClick={() => setAvailableOnly(!availableOnly)}
-          >
-            {availableOnly ? "Showing Available" : "Show Available Only"}
-          </Button>
-        </div>
-      </div>
+              {/* Filters */}
+              <div className="flex flex-wrap gap-3 items-center">
+                <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                  <SelectTrigger className="w-[200px]">
+                    <SelectValue placeholder="All Categories" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Categories</SelectItem>
+                    {categories.map((category) => (
+                      <SelectItem key={category} value={category}>
+                        {category}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+
+                <Button
+                  variant={availableOnly ? "default" : "outline"}
+                  onClick={() => setAvailableOnly(!availableOnly)}
+                >
+                  {availableOnly ? "Showing Available" : "Show Available Only"}
+                </Button>
+
+                {(search || selectedCategory !== "all" || availableOnly) && (
+                  <Button
+                    variant="ghost"
+                    onClick={() => {
+                      setSearch("");
+                      setSelectedCategory("all");
+                      setAvailableOnly(false);
+                      setPage(1);
+                    }}
+                  >
+                    Clear Filters
+                  </Button>
+                )}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
       {loading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {[...Array(8)].map((_, i) => (
             <Card key={i}>
+              <Skeleton className="h-64 w-full" />
               <CardHeader>
                 <Skeleton className="h-6 w-3/4 mb-2" />
                 <Skeleton className="h-4 w-1/2" />
@@ -185,48 +210,67 @@ export default function BooksPage() {
         </div>
       ) : (
         <>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {/* Books Grid */}
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {books.map((book) => (
-              <Card key={book.id} className="flex flex-col">
-                {book.coverImage && (
-                  <div className="relative w-full aspect-3/4 overflow-hidden rounded-t-lg bg-muted">
-                    <Image
-                      src={book.coverImage}
-                      alt={`Cover of ${book.title}`}
-                      fill
-                      className="object-cover"
-                      sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 25vw"
-                    />
-                  </div>
-                )}
-                <CardHeader>
-                  <CardTitle className="line-clamp-2">{book.title}</CardTitle>
-                  <CardDescription>{book.author}</CardDescription>
+              <Card 
+                key={book.id} 
+                className="group flex flex-col overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-2"
+              >
+                {/* Book Cover - Transparent background in card */}
+                <div className="relative w-full aspect-[1/1] flex items-center justify-center p-0.5">
+                  {book.coverImage ? (
+                    <div className="relative w-11/12 h-11/12">
+                      <Image
+                        src={book.coverImage}
+                        alt={`Cover of ${book.title}`}
+                        fill
+                        className="object-contain drop-shadow-2xl group-hover:scale-105 transition-all duration-500 ease-out"
+                        sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                      />
+                    </div>
+                  ) : (
+                    <div className="w-11/12 h-11/12 flex items-center justify-center">
+                      <BookOpen className="h-10 w-10 text-muted-foreground/30" />
+                    </div>
+                  )}
+                </div>
+
+                <CardHeader className="pb-0.5 pt-1.5 px-3">
+                  <CardTitle className="line-clamp-2 text-sm group-hover:text-primary transition-colors">
+                    {book.title}
+                  </CardTitle>
+                  <CardDescription className="text-xs">{book.author}</CardDescription>
                 </CardHeader>
-                <CardContent className="flex-1">
-                  <div className="space-y-2">
-                    <Badge variant="secondary">{book.category}</Badge>
-                    <p className="text-sm text-muted-foreground line-clamp-3">
+
+                <CardContent className="flex-1 pb-0.5 px-3">
+                  <div className="space-y-1.5">
+                    <Badge variant="default" className="text-xs font-semibold bg-primary text-primary-foreground">
+                      {book.category}
+                    </Badge>
+                    <p className="text-xs text-muted-foreground line-clamp-2">
                       {book.description || "No description available"}
                     </p>
-                    <div className="text-sm">
+                    <div className="text-xs font-semibold flex items-center gap-1.5">
+                      <div className={`h-1.5 w-1.5 rounded-full ${book.availableQuantity > 0 ? 'bg-green-500' : 'bg-muted-foreground'}`} />
                       <span
                         className={
                           book.availableQuantity > 0
                             ? "text-green-600"
-                            : "text-red-600"
+                            : "text-muted-foreground"
                         }
                       >
                         {book.availableQuantity > 0
-                          ? `${book.availableQuantity} available`
+                          ? `${book.availableQuantity} Available`
                           : "Not available"}
                       </span>
                     </div>
                   </div>
                 </CardContent>
-                <CardFooter>
+
+                <CardFooter className="pt-0 pb-1.5 px-3">
                   <Link href={`/books/${book.id}`} className="w-full">
-                    <Button className="w-full" variant="outline">
+                    <Button className="w-full h-8 text-xs group-hover:shadow-lg transition-all" variant="outline">
                       View Details
                     </Button>
                   </Link>
@@ -235,6 +279,7 @@ export default function BooksPage() {
             ))}
           </div>
 
+          {/* Pagination */}
           {totalPages > 1 && (
             <div className="mt-8 flex justify-center gap-2">
               <Button
@@ -260,6 +305,7 @@ export default function BooksPage() {
           )}
         </>
       )}
+      </div>
     </div>
   );
 }
