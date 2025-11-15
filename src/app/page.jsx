@@ -211,7 +211,7 @@ export default function Home() {
               </p>
             </div>
             <Link href="/books">
-              <Button variant="outline" className="gap-2">
+              <Button variant="outline" className="gap-2 transition-transform duration-300 hover:scale-110">
                 View All
                 <ArrowRight className="h-4 w-4" />
               </Button>
@@ -250,7 +250,7 @@ export default function Home() {
                   </CardContent>
                   <CardFooter>
                     <Link href={`/books/${book.id}`} className="w-full">
-                      <Button variant="outline" className="w-full">
+                      <Button variant="outline" className="w-full transition-transform duration-300 hover:scale-110">
                         View Details
                       </Button>
                     </Link>
@@ -273,7 +273,7 @@ export default function Home() {
               </p>
             </div>
             <Link href="/announcements">
-              <Button variant="outline" className="gap-2">
+              <Button variant="outline" className="gap-2 transition-transform duration-300 hover:scale-110">
                 View All
                 <ArrowRight className="h-4 w-4" />
               </Button>
@@ -350,7 +350,7 @@ export default function Home() {
             Join Naratama Library today and unlock a world of knowledge
           </p>
           <Link href="/auth/register">
-            <Button size="lg" variant="secondary" className="gap-2">
+            <Button size="lg" variant="secondary" className="gap-2 transition-transform duration-300 hover:scale-110">
               <Users className="h-5 w-5" />
               Create Account
             </Button>
