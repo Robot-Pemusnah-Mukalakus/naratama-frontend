@@ -23,11 +23,19 @@ import {
   Users,
   Clock,
 } from "lucide-react";
+import useEmblaCarousel from "embla-carousel-react";
+import Autoplay from "embla-carousel-autoplay";
 
 export default function Home() {
   const [newBooks, setNewBooks] = useState([]);
   const [announcements, setAnnouncements] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  // Embla Carousel for Features section with infinite loop and autoplay
+  const [emblaRef] = useEmblaCarousel(
+    { loop: true, align: "start" },
+    [Autoplay({ delay: 3500, stopOnInteraction: false })]
+  );
 
   useEffect(() => {
     fetchHomeData();
@@ -56,28 +64,36 @@ export default function Home() {
   return (
     <div className="flex flex-col">
       {/* Hero Section */}
-      <section className="bg-linear-to-b from-zinc-50 to-white dark:from-zinc-900 dark:to-black py-20">
-        <div className="container mx-auto px-4">
+      <section 
+        className="relative py-20 bg-cover bg-center"
+        style={{
+          backgroundImage: "url('/library.jpg')",
+        }}
+      >
+        {/* Blurry white overlay */}
+        <div className="absolute inset-0 bg-white/10 backdrop-blur-sm"></div>
+        
+        <div className="container mx-auto px-4 relative z-10">
           <div className="max-w-3xl mx-auto text-center">
             <div className="inline-flex items-center justify-center p-3 bg-primary/10 rounded-full mb-6">
-              <Library className="h-12 w-12 text-primary" />
+              <Library className="h-12 w-12 text-white" />
             </div>
-            <h1 className="text-5xl font-bold mb-6 tracking-tight">
+            <h1 className="text-5xl font-extrabold mb-6 tracking-tight text-white drop-shadow-2xl">
               Welcome to Naratama Library
             </h1>
-            <p className="text-xl text-muted-foreground mb-8">
+            <p className="text-xl font-semibold text-white drop-shadow-2xl mb-8">
               Your gateway to knowledge. Browse thousands of books, book study
               rooms, and stay updated with our latest news.
             </p>
             <div className="flex gap-4 justify-center">
               <Link href="/books">
-                <Button size="lg" className="gap-2">
+                <Button size="lg" className="gap-2 transition-transform duration-300 hover:scale-110">
                   <BookOpen className="h-5 w-5" />
                   Browse Books
                 </Button>
               </Link>
               <Link href="/rooms">
-                <Button size="lg" variant="outline" className="gap-2">
+                <Button size="lg" variant="outline" className="gap-2 transition-transform duration-300 hover:scale-110">
                   <DoorOpen className="h-5 w-5" />
                   Book a Room
                 </Button>
@@ -88,45 +104,98 @@ export default function Home() {
       </section>
 
       {/* Features Section */}
-      <section className="py-16 bg-white dark:bg-black">
+      <section className="py-16 bg-white dark:bg-black overflow-hidden">
         <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <Card className="text-center">
-              <CardHeader>
-                <div className="mx-auto mb-4 p-3 bg-primary/10 rounded-full w-fit">
-                  <BookOpen className="h-8 w-8 text-primary" />
-                </div>
-                <CardTitle>Vast Collection</CardTitle>
-                <CardDescription>
-                  Access thousands of books across multiple categories and
-                  genres
-                </CardDescription>
-              </CardHeader>
-            </Card>
+          <div className="overflow-hidden" ref={emblaRef}>
+            <div className="flex">
+              {/* First set of slides */}
+              <div className="flex-[0_0_100%] min-w-0 md:flex-[0_0_50%] lg:flex-[0_0_33.333%] pl-3 pr-3">
+                <Card className="text-center h-full">
+                  <CardHeader>
+                    <div className="mx-auto mb-4 p-3 bg-primary/10 rounded-full w-fit">
+                      <BookOpen className="h-8 w-8 text-primary" />
+                    </div>
+                    <CardTitle>Vast Collection</CardTitle>
+                    <CardDescription>
+                      Access thousands of books across multiple categories and
+                      genres
+                    </CardDescription>
+                  </CardHeader>
+                </Card>
+              </div>
 
-            <Card className="text-center">
-              <CardHeader>
-                <div className="mx-auto mb-4 p-3 bg-primary/10 rounded-full w-fit">
-                  <DoorOpen className="h-8 w-8 text-primary" />
-                </div>
-                <CardTitle>Study Rooms</CardTitle>
-                <CardDescription>
-                  Book comfortable study rooms for individual or group sessions
-                </CardDescription>
-              </CardHeader>
-            </Card>
+              <div className="flex-[0_0_100%] min-w-0 md:flex-[0_0_50%] lg:flex-[0_0_33.333%] pl-3 pr-3">
+                <Card className="text-center h-full">
+                  <CardHeader>
+                    <div className="mx-auto mb-4 p-3 bg-primary/10 rounded-full w-fit">
+                      <DoorOpen className="h-8 w-8 text-primary" />
+                    </div>
+                    <CardTitle>Study Rooms</CardTitle>
+                    <CardDescription>
+                      Book comfortable study rooms for individual or group sessions
+                    </CardDescription>
+                  </CardHeader>
+                </Card>
+              </div>
 
-            <Card className="text-center">
-              <CardHeader>
-                <div className="mx-auto mb-4 p-3 bg-primary/10 rounded-full w-fit">
-                  <Clock className="h-8 w-8 text-primary" />
-                </div>
-                <CardTitle>Easy Borrowing</CardTitle>
-                <CardDescription>
-                  Simple and fast book borrowing system with automated tracking
-                </CardDescription>
-              </CardHeader>
-            </Card>
+              <div className="flex-[0_0_100%] min-w-0 md:flex-[0_0_50%] lg:flex-[0_0_33.333%] pl-3 pr-3">
+                <Card className="text-center h-full">
+                  <CardHeader>
+                    <div className="mx-auto mb-4 p-3 bg-primary/10 rounded-full w-fit">
+                      <Clock className="h-8 w-8 text-primary" />
+                    </div>
+                    <CardTitle>Easy Borrowing</CardTitle>
+                    <CardDescription>
+                      Simple and fast book borrowing system with automated tracking
+                    </CardDescription>
+                  </CardHeader>
+                </Card>
+              </div>
+
+              {/* Duplicate set for smooth infinite loop */}
+              <div className="flex-[0_0_100%] min-w-0 md:flex-[0_0_50%] lg:flex-[0_0_33.333%] pl-3 pr-3">
+                <Card className="text-center h-full">
+                  <CardHeader>
+                    <div className="mx-auto mb-4 p-3 bg-primary/10 rounded-full w-fit">
+                      <BookOpen className="h-8 w-8 text-primary" />
+                    </div>
+                    <CardTitle>Vast Collection</CardTitle>
+                    <CardDescription>
+                      Access thousands of books across multiple categories and
+                      genres
+                    </CardDescription>
+                  </CardHeader>
+                </Card>
+              </div>
+
+              <div className="flex-[0_0_100%] min-w-0 md:flex-[0_0_50%] lg:flex-[0_0_33.333%] pl-3 pr-3">
+                <Card className="text-center h-full">
+                  <CardHeader>
+                    <div className="mx-auto mb-4 p-3 bg-primary/10 rounded-full w-fit">
+                      <DoorOpen className="h-8 w-8 text-primary" />
+                    </div>
+                    <CardTitle>Study Rooms</CardTitle>
+                    <CardDescription>
+                      Book comfortable study rooms for individual or group sessions
+                    </CardDescription>
+                  </CardHeader>
+                </Card>
+              </div>
+
+              <div className="flex-[0_0_100%] min-w-0 md:flex-[0_0_50%] lg:flex-[0_0_33.333%] pl-3 pr-3">
+                <Card className="text-center h-full">
+                  <CardHeader>
+                    <div className="mx-auto mb-4 p-3 bg-primary/10 rounded-full w-fit">
+                      <Clock className="h-8 w-8 text-primary" />
+                    </div>
+                    <CardTitle>Easy Borrowing</CardTitle>
+                    <CardDescription>
+                      Simple and fast book borrowing system with automated tracking
+                    </CardDescription>
+                  </CardHeader>
+                </Card>
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -142,7 +211,7 @@ export default function Home() {
               </p>
             </div>
             <Link href="/books">
-              <Button variant="outline" className="gap-2">
+              <Button variant="outline" className="gap-2 transition-transform duration-300 hover:scale-110">
                 View All
                 <ArrowRight className="h-4 w-4" />
               </Button>
@@ -181,7 +250,7 @@ export default function Home() {
                   </CardContent>
                   <CardFooter>
                     <Link href={`/books/${book.id}`} className="w-full">
-                      <Button variant="outline" className="w-full">
+                      <Button variant="outline" className="w-full transition-transform duration-300 hover:scale-110">
                         View Details
                       </Button>
                     </Link>
@@ -204,7 +273,7 @@ export default function Home() {
               </p>
             </div>
             <Link href="/announcements">
-              <Button variant="outline" className="gap-2">
+              <Button variant="outline" className="gap-2 transition-transform duration-300 hover:scale-110">
                 View All
                 <ArrowRight className="h-4 w-4" />
               </Button>
@@ -281,7 +350,7 @@ export default function Home() {
             Join Naratama Library today and unlock a world of knowledge
           </p>
           <Link href="/auth/register">
-            <Button size="lg" variant="secondary" className="gap-2">
+            <Button size="lg" variant="secondary" className="gap-2 transition-transform duration-300 hover:scale-110">
               <Users className="h-5 w-5" />
               Create Account
             </Button>
