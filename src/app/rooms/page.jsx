@@ -24,7 +24,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { DoorOpen, Users, Clock, CheckCircle } from "lucide-react";
+import { DoorOpen, Users, Clock, CheckCircle, XCircle } from "lucide-react";
 import { toast } from "sonner";
 
 export default function RoomsPage() {
@@ -41,75 +41,78 @@ export default function RoomsPage() {
     specialRequests: "",
   });
 
-  useEffect(() => {
-    fetchRooms();
-  }, []);
+      // -- FILTER STATES --
+      const [capacity, setCapacity] = useState(""); // "", "5", "10", "20", ">30"
+      const [availability, setAvailability] = useState(""); // "", "available", "not_available"
 
-  const fetchRooms = async () => {
-    setLoading(true);
-    try {
-      const response = await roomsService.getRooms({ available: "true" });
-      if (response.success) {
-        setRooms(response.data || []);
-      }
-    } catch (error) {
-      toast.error("Failed to load rooms");
-      console.error("Failed to fetch rooms:", error);
-    } finally {
+      useEffect(() => {
+      fetchRooms();
+      }, []);
+
+      const fetchRooms = async () => {
+      setLoading(true);
+      try {
+        const response = await roomsService.getRooms({ available: "true" });
+          if (response.success) {
+            setRooms(response.data || []);
+          }
+      } catch (error) {
+        toast.error("Failed to load rooms");
+        console.error("Failed to fetch rooms:", error);
+      } finally {
       setLoading(false);
-    }
-  };
-
-  const handleBookRoom = (room) => {
-    if (!isAuthenticated) {
-      toast.error("Please login to book a room");
-      return;
-    }
-    setSelectedRoom(room);
-    setBookingDialogOpen(true);
-  };
-
-  const handleSubmitBooking = async (e) => {
-    e.preventDefault();
-
-    try {
-      // Convert date and time to ISO format
-      const bookingDate = new Date(
-        bookingForm.bookingDate + "T00:00:00"
-      ).toISOString();
-      const startTime = new Date(
-        bookingForm.bookingDate + "T" + bookingForm.startTime + ":00"
-      ).toISOString();
-      const endTime = new Date(
-        bookingForm.bookingDate + "T" + bookingForm.endTime + ":00"
-      ).toISOString();
-
-      const bookingData = {
-        userId: user.id,
-        roomId: selectedRoom.id,
-        bookingDate: bookingDate,
-        startTime: startTime,
-        endTime: endTime,
-        purpose: bookingForm.purpose,
-        specialRequests: bookingForm.specialRequests || undefined,
+      }
       };
 
-      const response = await roomsService.createBooking(bookingData);
-      if (response.success) {
-        toast.success("Room booking request submitted successfully!");
-        setBookingDialogOpen(false);
-        setBookingForm({
-          bookingDate: "",
-          startTime: "",
-          endTime: "",
-          purpose: "",
-          specialRequests: "",
-        });
+      const handleBookRoom = (room) => {
+        if (!isAuthenticated) {
+          toast.error("Please login to book a room");
+        return;
+        }
+        setSelectedRoom(room);
+        setBookingDialogOpen(true);
+      };
+
+      const handleSubmitBooking = async (e) => {
+      e.preventDefault();
+
+      try {
+        const bookingDate = new Date(
+          bookingForm.bookingDate + "T00:00:00"
+        ).toISOString();
+        const startTime = new Date(
+          bookingForm.bookingDate + "T" + bookingForm.startTime + ":00"
+        ).toISOString();
+        const endTime = new Date(
+          bookingForm.bookingDate + "T" + bookingForm.endTime + ":00"
+        ).toISOString();
+
+        const bookingData = {
+          userId: user.id,
+          roomId: selectedRoom.id,
+          bookingDate,
+          startTime,
+          endTime,
+          purpose: bookingForm.purpose,
+          specialRequests: bookingForm.specialRequests || undefined,
+        };
+
+        const response = await roomsService.createBooking(bookingData);
+          if (response.success) {
+            toast.success("Room booking request submitted successfully!");
+            setBookingDialogOpen(false);
+            setBookingForm({
+              bookingDate: "",
+              startTime: "",
+              endTime: "",
+              purpose: "",
+              specialRequests: "",
+            });
+          }
+      } catch (error) {
+        toast.error(error.message || "Failed to create booking");
+        console.error("Failed to create booking:", error);
       }
-    } catch (error) {
-      toast.error(error.message || "Failed to create booking");
-      console.error("Failed to create booking:", error);
-    }
   };
 
   const getRoomTypeLabel = (type) => {
@@ -123,14 +126,93 @@ export default function RoomsPage() {
     }
   };
 
-  return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="mb-8">
-        <h1 className="text-4xl font-bold mb-2">Study Rooms</h1>
-        <p className="text-muted-foreground">
-          Book a room for your study sessions or meetings
-        </p>
+        // --- Filtering logic ---
+        const filteredRooms = rooms.filter((room) => {
+          // Capacity filter: interpret as "minimum capacity required"
+          if (capacity) {
+            if (capacity === ">30") {
+              if (!(room.capacity > 30)) return false;
+            } else {
+              const min = parseInt(capacity, 10);
+              if (Number.isFinite(min) && room.capacity < min) return false;
+            }
+          }
+
+          // Availability filter
+          if (availability) {
+            if (availability === "available" && !room.isAvailable) return false;
+            if (availability === "not_available" && room.isAvailable) return false;
+          }
+
+          return true;
+        });
+
+      return (
+        <div className="container mx-auto px-4 py-8">
+          <div className="mb-8">
+            <h1 className="text-4xl font-bold mb-2">Study Rooms</h1>
+            <p className="text-muted-foreground">
+            Book a room for your study sessions or meetings
+            </p>
+          </div>
+
+            {/* Filters */}
+    <div className="flex flex-wrap gap-4 mb-8 items-end">
+      {/* Capacity Filter */}
+      <div className="flex flex-col">
+        <label className="text-sm font-medium mb-1">Capacity (min)</label>
+        <select
+          aria-label="Filter by capacity"
+          value={capacity}
+          onChange={(e) => setCapacity(e.target.value)}
+          className="border rounded-xl px-4 py-2 bg-white"
+        >
+          <option value="">All Capacities</option>
+          <option value="5">5</option>
+          <option value="10">10</option>
+          <option value="20">20</option>
+          <option value=">30">&gt; 30</option>
+        </select>
       </div>
+
+      {/* Availability Filter */}
+      <div className="flex flex-col">
+        <label className="text-sm font-medium mb-1 flex items-center gap-2">
+          Availability
+          {availability === "available" && (
+            <CheckCircle className="h-4 w-4 text-emerald-600" />
+          )}
+          {availability === "not_available" && (
+          <XCircle className="h-4 w-4 text-rose-600" />
+          )}
+        </label>
+
+        <select
+          aria-label="Filter by availability"
+          value={availability}
+          onChange={(e) => setAvailability(e.target.value)}
+          className="border rounded-xl px-4 py-2 bg-white"
+        >
+          <option value="">All</option>
+          <option value="available">Available</option>
+          <option value="not_available">Not Available</option>
+        </select>
+      </div>
+
+      {/* Reset Filters button */}
+      <div className="flex items-center">
+        <Button
+          variant="outline"
+          className="transition-colors duration-200 hover:bg-black hover:text-white"
+          onClick={() => {
+            setCapacity("");
+            setAvailability("");
+          }}
+        >
+          Reset Filters
+        </Button>
+      </div>
+  </div>
 
       {loading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -146,7 +228,7 @@ export default function RoomsPage() {
             </Card>
           ))}
         </div>
-      ) : rooms.length === 0 ? (
+      ) : filteredRooms.length === 0 ? (
         <div className="text-center py-12">
           <DoorOpen className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
           <h3 className="text-xl font-semibold mb-2">No rooms available</h3>
@@ -154,8 +236,11 @@ export default function RoomsPage() {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {rooms.map((room) => (
-            <Card key={room.id}>
+          {filteredRooms.map((room) => (
+            <Card
+              key={room.id}
+              className="transition-transform duration-300 hover:scale-[1.03]"
+            >
               <CardHeader>
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
@@ -164,18 +249,25 @@ export default function RoomsPage() {
                       {getRoomTypeLabel(room.type)}
                     </CardDescription>
                   </div>
-                  {room.isAvailable && (
-                    <Badge variant="default" className="gap-1">
-                      <CheckCircle className="h-3 w-3" />
-                      Available
-                    </Badge>
-                  )}
+                  <div className="flex items-center gap-2">
+                    {/* availability badge with icon */}
+                    {room.isAvailable ? (
+                      <Badge variant="default" className="gap-1 flex items-center">
+                        <CheckCircle className="h-3 w-3 text-emerald-600" />
+                        Available
+                      </Badge>
+                    ) : (
+                      <Badge variant="outline" className="gap-1 flex items-center">
+                        <XCircle className="h-3 w-3 text-rose-600" />
+                        Not Available
+                      </Badge>
+                    )}
+                  </div>
                 </div>
               </CardHeader>
               <CardContent className="space-y-4">
                 <p className="text-sm text-muted-foreground">
-                  {room.description ||
-                    "A comfortable space for your study needs."}
+                  {room.description || "A comfortable space for your study needs."}
                 </p>
 
                 <div className="space-y-2">

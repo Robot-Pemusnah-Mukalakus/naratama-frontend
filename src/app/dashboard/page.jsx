@@ -188,7 +188,7 @@ export default function DashboardPage() {
       </div>
 
       <Tabs defaultValue="loans" className="space-y-4">
-        <TabsList>
+        <TabsList className="w-150 mx-auto">
           <TabsTrigger value="loans">My Loans</TabsTrigger>
           <TabsTrigger value="bookings">My Bookings</TabsTrigger>
         </TabsList>
