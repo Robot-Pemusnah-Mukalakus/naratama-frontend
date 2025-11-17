@@ -216,6 +216,7 @@ export default function MembershipPage() {
   }
 
   const membershipStatus = getMembershipStatus();
+  console.log("Membership Status:", membershipStatus);
   const hasMembership = membershipStatus && membershipStatus.isActive;
 
   return (
