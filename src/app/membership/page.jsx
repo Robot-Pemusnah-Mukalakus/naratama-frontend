@@ -48,8 +48,6 @@ export default function MembershipPage() {
     setLoading(true);
     try {
       const response = await usersService.getCurrentUser();
-      console.log("User details:", response);
-      console.log("User membership:", response?.data?.membership);
       if (response.success && response.data) {
         setUserDetails(response.data);
       }
@@ -121,20 +119,13 @@ export default function MembershipPage() {
   ];
 
   const getMembershipStatus = () => {
-    console.log("Getting membership status for userDetails:", userDetails);
-    console.log("Membership object:", userDetails?.membership);
-
     if (!userDetails?.membership) {
-      console.log("No membership found - returning null");
       return null;
     }
 
     const { startDate, endDate, isActive } = userDetails.membership;
-    console.log("Membership data:", { startDate, endDate, isActive });
-
     // Check if membership is active based on both the isActive flag and endDate
     const isCurrentlyActive = isActive && new Date(endDate) > new Date();
-    console.log("Is currently active:", isCurrentlyActive);
 
     return {
       type: isCurrentlyActive ? "PREMIUM" : "BASIC",
@@ -164,7 +155,6 @@ export default function MembershipPage() {
         // Redirect to payment gateway with the token
         window.snap.pay(response.token, {
           onSuccess: async function (result) {
-            console.log("Payment success:", result);
             const res = await paymentService.finishMembershipPayment(
               user.id,
               result.order_id
@@ -180,7 +170,6 @@ export default function MembershipPage() {
             }
           },
           onPending: function (result) {
-            console.log("Payment pending:", result);
             toast.info("Payment is pending. Please complete the payment.");
           },
           onError: function (result) {
@@ -188,7 +177,6 @@ export default function MembershipPage() {
             toast.error("Payment failed. Please try again.");
           },
           onClose: function () {
-            console.log("Payment popup closed");
             toast.info("Payment cancelled.");
           },
         });
@@ -226,7 +214,6 @@ export default function MembershipPage() {
   }
 
   const membershipStatus = getMembershipStatus();
-  console.log("Membership Status:", membershipStatus);
   const hasMembership = membershipStatus && membershipStatus.isActive;
 
   return (
@@ -236,7 +223,6 @@ export default function MembershipPage() {
         data-client-key={process.env.MIDTRANS_CLIENT_KEY || ""}
         strategy="afterInteractive"
         onLoad={() => {
-          console.log("Midtrans Snap loaded");
           setSnapLoaded(true);
         }}
         onError={(e) => {
