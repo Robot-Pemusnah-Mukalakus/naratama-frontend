@@ -122,14 +122,15 @@ export default function MembershipPage() {
   const getMembershipStatus = () => {
     if (!userDetails?.membership) return null;
 
-    const { membershipType, startDate, expiryDate } = userDetails.membership;
-    const isActive = new Date(expiryDate) > new Date();
+    const { startDate, endDate, isActive } = userDetails.membership;
+    // Check if membership is active based on both the isActive flag and endDate
+    const isCurrentlyActive = isActive && new Date(endDate) > new Date();
 
     return {
-      type: membershipType || "BASIC",
+      type: isCurrentlyActive ? "PREMIUM" : "BASIC",
       startDate,
-      expiryDate,
-      isActive,
+      expiryDate: endDate, // Map endDate to expiryDate for consistency in the UI
+      isActive: isCurrentlyActive,
     };
   };
 
