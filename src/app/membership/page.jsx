@@ -146,7 +146,6 @@ export default function MembershipPage() {
     }
 
     try {
-      setLoading(true);
       // Pass the current user's ID to the payment service
       const response = await paymentService.createMembershipPayment(user.id);
 
@@ -155,7 +154,7 @@ export default function MembershipPage() {
         window.snap.pay(response.token, {
           onSuccess: async function (result) {
             console.log("Payment success:", result);
-            res = await paymentService.finishMembershipPayment(user.id, result.payment_id);
+            res = await paymentService.finishMembershipPayment(user.id, result.order_id);
             
             if (res.success) {
               toast.success("Payment successful! Membership activated.");
