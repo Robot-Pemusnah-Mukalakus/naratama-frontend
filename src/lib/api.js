@@ -159,8 +159,9 @@ export const usersService = {
 };
 
 export const paymentService = {
-  // POST request - user is obtained from session cookie automatically
-  createMembershipPayment: () => apiClient.post("/api/payment/membership"),
+  // POST request - pass userId in request body
+  createMembershipPayment: (userId) =>
+    apiClient.post("/api/payment/membership", { userId }),
   createRoomPayment: (roomData) =>
     apiClient.post("/api/payment/room", roomData),
 };

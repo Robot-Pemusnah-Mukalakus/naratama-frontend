@@ -146,8 +146,8 @@ export default function MembershipPage() {
 
     try {
       setLoading(true);
-      // Backend will get user from session/auth automatically via credentials
-      const response = await paymentService.createMembershipPayment();
+      // Pass the current user's ID to the payment service
+      const response = await paymentService.createMembershipPayment(user.id);
 
       if (response.success && response.token) {
         // Redirect to payment gateway with the token
