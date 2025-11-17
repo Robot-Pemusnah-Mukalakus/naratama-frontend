@@ -20,6 +20,27 @@ const nextConfig = {
       },
     ],
   },
+
+  async headers() {
+    return [
+      {
+        source: "/(.*)", // apply to all routes
+        headers: [
+          {
+            key: "Content-Security-Policy",
+            value: `
+              default-src 'self';
+              script-src 'self' https://app.sandbox.midtrans.com https://snap-assets.al-pc-id-b.cdn.gtfblabs.io;
+              frame-src https://app.sandbox.midtrans.com https://app.midtrans.com;
+              connect-src 'self' https://app.sandbox.midtrans.com;
+              img-src 'self' data: https:;
+              style-src 'self' 'unsafe-inline';
+            `.replace(/\s+/g, " "), // remove newlines
+          },
+        ],
+      },
+    ];
+  },
 };
 
 export default nextConfig;
