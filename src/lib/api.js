@@ -162,6 +162,8 @@ export const paymentService = {
   // POST request - pass userId in request body
   createMembershipPayment: (userId) =>
     apiClient.post("/api/payment/membership", { userId }),
+  finishMembershipPayment: (userId, paymentId) =>
+    apiClient.post("/api/payment/membership/finish", { userId, paymentId }),
   createRoomPayment: (roomData) =>
     apiClient.post("/api/payment/room", roomData),
 };
