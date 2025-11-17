@@ -49,6 +49,7 @@ export default function MembershipPage() {
     try {
       const response = await usersService.getCurrentUser();
       console.log("User details:", response);
+      console.log("User membership:", response?.user?.membership);
       if (response.success && response.user) {
         setUserDetails(response.user);
       }
@@ -120,11 +121,20 @@ export default function MembershipPage() {
   ];
 
   const getMembershipStatus = () => {
-    if (!userDetails?.membership) return null;
+    console.log("Getting membership status for userDetails:", userDetails);
+    console.log("Membership object:", userDetails?.membership);
+
+    if (!userDetails?.membership) {
+      console.log("No membership found - returning null");
+      return null;
+    }
 
     const { startDate, endDate, isActive } = userDetails.membership;
+    console.log("Membership data:", { startDate, endDate, isActive });
+
     // Check if membership is active based on both the isActive flag and endDate
     const isCurrentlyActive = isActive && new Date(endDate) > new Date();
+    console.log("Is currently active:", isCurrentlyActive);
 
     return {
       type: isCurrentlyActive ? "PREMIUM" : "BASIC",
