@@ -75,10 +75,84 @@ export default function RoomsPage() {
     setBookingDialogOpen(true);
   };
 
+  // Validasi form booking
+  const validateBookingForm = () => {
+    const { bookingDate, startTime, endTime } = bookingForm;
+
+    // 1. Check if all required fields are filled
+    if (!bookingDate || !startTime || !endTime) {
+      toast.error("Mohon lengkapi semua field yang wajib diisi");
+      return false;
+    }
+
+    // 2. Check if booking date is weekday (Monday-Friday)
+    const selectedDate = new Date(bookingDate);
+    const dayOfWeek = selectedDate.getDay();
+    if (dayOfWeek === 0 || dayOfWeek === 6) {
+      toast.error("Booking hanya tersedia di hari kerja (Senin-Jumat)");
+      return false;
+    }
+
+    // 3. Check if booking date is in the future (or today)
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    selectedDate.setHours(0, 0, 0, 0);
+    if (selectedDate < today) {
+      toast.error("Tanggal booking tidak boleh di masa lalu");
+      return false;
+    }
+
+    // 4. Parse times
+    const [startHour, startMinute] = startTime.split(":").map(Number);
+    const [endHour, endMinute] = endTime.split(":").map(Number);
+
+    // 5. Check operating hours (08:00 - 20:00)
+    if (startHour < 8 || startHour >= 20) {
+      toast.error("Waktu mulai harus antara jam 08:00 - 19:59");
+      return false;
+    }
+    if (endHour < 8 || endHour > 20) {
+      toast.error("Waktu selesai harus antara jam 08:00 - 20:00");
+      return false;
+    }
+
+    // 6. Check if start time is before end time
+    const startMinutes = startHour * 60 + startMinute;
+    const endMinutes = endHour * 60 + endMinute;
+    if (startMinutes >= endMinutes) {
+      toast.error("Waktu mulai harus sebelum waktu selesai");
+      return false;
+    }
+
+    // 7. Check minimum duration (1 hour = 60 minutes)
+    const durationMinutes = endMinutes - startMinutes;
+    if (durationMinutes < 60) {
+      toast.error("Durasi booking minimal 1 jam");
+      return false;
+    }
+
+    // 8. If booking is today, check if start time is in the future
+    if (selectedDate.getTime() === today.getTime()) {
+      const now = new Date();
+      const currentMinutes = now.getHours() * 60 + now.getMinutes();
+      if (startMinutes <= currentMinutes) {
+        toast.error("Waktu mulai harus di masa depan");
+        return false;
+      }
+    }
+
+    return true;
+  };
+
   const handleSubmitBooking = async (e) => {
     e.preventDefault();
     setPaymentRequired(false);
     setPaymentDetails(null);
+
+    // Validasi form dulu
+    if (!validateBookingForm()) {
+      return;
+    }
 
     try {
       const bookingDate = new Date(
@@ -409,7 +483,7 @@ export default function RoomsPage() {
           ) : (
             <form onSubmit={handleSubmitBooking} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="bookingDate">Date</Label>
+                <Label htmlFor="bookingDate">Tanggal Booking *</Label>
                 <Input
                   id="bookingDate"
                   type="date"
@@ -423,46 +497,58 @@ export default function RoomsPage() {
                   required
                   min={new Date().toISOString().split("T")[0]}
                 />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="startTime">Start Time</Label>
-                  <Input
-                    id="startTime"
-                    type="time"
-                    value={bookingForm.startTime}
-                    onChange={(e) =>
-                      setBookingForm({
-                        ...bookingForm,
-                        startTime: e.target.value,
-                      })
-                    }
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="endTime">End Time</Label>
-                  <Input
-                    id="endTime"
-                    type="time"
-                    value={bookingForm.endTime}
-                    onChange={(e) =>
-                      setBookingForm({
-                        ...bookingForm,
-                        endTime: e.target.value,
-                      })
-                    }
-                    required
-                  />
-                </div>
+                <p className="text-xs text-muted-foreground">
+                  ℹ️ Hanya hari kerja (Senin-Jumat)
+                </p>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="purpose">Purpose</Label>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="startTime">Waktu Mulai *</Label>
+                    <Input
+                      id="startTime"
+                      type="time"
+                      value={bookingForm.startTime}
+                      onChange={(e) =>
+                        setBookingForm({
+                          ...bookingForm,
+                          startTime: e.target.value,
+                        })
+                      }
+                      required
+                      min="08:00"
+                      max="19:59"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="endTime">Waktu Selesai *</Label>
+                    <Input
+                      id="endTime"
+                      type="time"
+                      value={bookingForm.endTime}
+                      onChange={(e) =>
+                        setBookingForm({
+                          ...bookingForm,
+                          endTime: e.target.value,
+                        })
+                      }
+                      required
+                      min="08:00"
+                      max="20:00"
+                    />
+                  </div>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  ⏰ Jam operasional: 08:00 - 20:00 | Minimal 1 jam
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="purpose">Tujuan Booking *</Label>
                 <Input
                   id="purpose"
-                  placeholder="e.g., Group study, Meeting"
+                  placeholder="Contoh: Diskusi kelompok, Rapat, Belajar"
                   value={bookingForm.purpose}
                   onChange={(e) =>
                     setBookingForm({ ...bookingForm, purpose: e.target.value })
@@ -473,11 +559,11 @@ export default function RoomsPage() {
 
               <div className="space-y-2">
                 <Label htmlFor="specialRequests">
-                  Special Requests (Optional)
+                  Permintaan Khusus (Opsional)
                 </Label>
                 <Textarea
                   id="specialRequests"
-                  placeholder="Any special requirements..."
+                  placeholder="Contoh: Butuh proyektor, Perlu AC, dll..."
                   value={bookingForm.specialRequests}
                   onChange={(e) =>
                     setBookingForm({
@@ -496,10 +582,10 @@ export default function RoomsPage() {
                   className="flex-1"
                   onClick={() => setBookingDialogOpen(false)}
                 >
-                  Cancel
+                  Batal
                 </Button>
                 <Button type="submit" className="flex-1">
-                  Submit Booking
+                  Konfirmasi Booking
                 </Button>
               </div>
             </form>
