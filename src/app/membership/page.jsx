@@ -23,6 +23,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import { toast } from "sonner";
+import { Script } from "next/script";
 import { useRouter } from "next/navigation";
 
 export default function MembershipPage() {
@@ -32,29 +33,16 @@ export default function MembershipPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-if (!authLoading && isAuthenticated && user) {
+  if (!authLoading && isAuthenticated && user) {
     fetchUserDetails();
-
-    // Load Midtrans Snap
-    const midtransScriptUrl = 'https://app.sandbox.midtrans.com/snap/snap.js';
-    const scriptTag = document.createElement('script');
-    scriptTag.src = midtransScriptUrl;
-
-    const myMidtransClientKey = 'your-client-key-goes-here';
-    scriptTag.setAttribute('data-client-key', myMidtransClientKey);
-
-    document.body.appendChild(scriptTag);
-
-    return () => {
-      document.body.removeChild(scriptTag);
-    };
+    return;
   }
 
   if (!authLoading && !isAuthenticated) {
     setLoading(false);
   }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAuthenticated, authLoading, user]);
+
 
   const fetchUserDetails = async () => {
     setLoading(true);
@@ -202,6 +190,13 @@ if (!authLoading && isAuthenticated && user) {
   const hasMembership = membershipStatus && membershipStatus.isActive;
 
   return (
+    <>  
+      <Script
+        src="https://app.sandbox.midtrans.com/snap/snap.js"
+        strategy="afterInteractive"
+        data-client-key="your-client-key-goes-here"
+      />
+
     <div className="container mx-auto px-4 py-8">
       {/* Header */}
       <div className="mb-8 text-center">
@@ -432,5 +427,6 @@ if (!authLoading && isAuthenticated && user) {
         </div>
       )}
     </div>
+  </>
   );
 }
