@@ -20,7 +20,7 @@ import { toast } from "sonner";
 
 export default function LoginPage() {
   const router = useRouter();
-  const { login } = useAuth();
+  const { login, googleLogin } = useAuth();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [formData, setFormData] = useState({
@@ -51,6 +51,12 @@ export default function LoginPage() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleGoogleLogin = (e) => {
+    e.preventDefault();
+    setError("");
+    googleLogin();
   };
 
   return (
@@ -96,9 +102,19 @@ export default function LoginPage() {
               />
             </div>
           </CardContent>
-          <CardFooter className="flex flex-col gap-4">
+          <CardFooter className="flex flex-col gap-4 mt-6">
             <Button type="submit" className="w-full" disabled={loading}>
               {loading ? "Logging in..." : "Login"}
+            </Button>
+            <Button
+              type="button"
+              onClick={handleGoogleLogin}
+              className="w-full"
+              disabled={loading}
+              variant="secondary"
+            >
+              <img src="/google.svg" alt="Google Logo" className="size-5" />
+              Login With Google
             </Button>
             <p className="text-sm text-center text-muted-foreground">
               Don&apos;t have an account?{" "}
