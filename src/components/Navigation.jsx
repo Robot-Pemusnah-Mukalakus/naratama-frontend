@@ -33,7 +33,7 @@ export default function Navigation() {
   };
 
   const navLinks = [
-    { href: "/" , label: "Home", icon: Home },
+    { href: "/", label: "Home", icon: Home },
     { href: "/books", label: "Books", icon: BookOpen },
     { href: "/announcements", label: "Announcements", icon: Bell },
     { href: "/rooms", label: "Rooms", icon: DoorOpen },
@@ -87,6 +87,11 @@ export default function Navigation() {
                 <Link href="/dashboard">
                   <Button variant="outline">Dashboard</Button>
                 </Link>
+                {isStaff && (
+                  <Link href="/admin">
+                    <Button variant="outline">Admin Dashboard</Button>
+                  </Link>
+                )}
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button
@@ -129,10 +134,17 @@ export default function Navigation() {
             ) : (
               <div className="flex items-center gap-2">
                 <Link href="/auth/login">
-                  <Button variant="outline" className="gap-2 transition-transform duration-300 hover:scale-110">Login</Button>
+                  <Button
+                    variant="outline"
+                    className="gap-2 transition-transform duration-300 hover:scale-110"
+                  >
+                    Login
+                  </Button>
                 </Link>
                 <Link href="/auth/register">
-                  <Button className="gap-2 transition-transform duration-300 hover:scale-110">Register</Button>
+                  <Button className="gap-2 transition-transform duration-300 hover:scale-110">
+                    Register
+                  </Button>
                 </Link>
               </div>
             )}
