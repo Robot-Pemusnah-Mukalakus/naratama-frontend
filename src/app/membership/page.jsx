@@ -154,14 +154,18 @@ export default function MembershipPage() {
         window.snap.pay(response.token, {
           onSuccess: async function (result) {
             console.log("Payment success:", result);
-            res = await paymentService.finishMembershipPayment(user.id, result.order_id);
-            
+            const res = await paymentService.finishMembershipPayment(
+              user.id,
+              result.order_id
+            );
+
             if (res.success) {
               toast.success("Payment successful! Membership activated.");
               fetchUserDetails();
             } else {
-              toast.error(res.message || "Failed to activate membership after payment");
-              
+              toast.error(
+                res.message || "Failed to activate membership after payment"
+              );
             }
           },
           onPending: function (result) {
