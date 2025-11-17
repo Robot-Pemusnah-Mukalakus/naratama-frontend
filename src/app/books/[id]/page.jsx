@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { booksService } from "@/lib/api";
+import { booksService, bookLoansService } from "@/lib/api";
 import { useAuth } from "@/context/AuthContext";
 import {
   Card,
@@ -15,6 +15,14 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@/components/ui/separator";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import {
   ArrowLeft,
   BookOpen,
@@ -33,6 +41,8 @@ export default function BookDetailPage() {
   const { isAuthenticated, user } = useAuth();
   const [book, setBook] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [borrowDialogOpen, setBorrowDialogOpen] = useState(false);
+  const [borrowing, setBorrowing] = useState(false);
 
   useEffect(() => {
     if (params.id) {
@@ -53,6 +63,28 @@ export default function BookDetailPage() {
       console.error("Failed to fetch book:", error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleBorrowRequest = async () => {
+    setBorrowing(true);
+    try {
+      const response = await bookLoansService.createLoan({
+        userId: user.id,
+        bookId: params.id,
+      });
+
+      if (response.success) {
+        toast.success("Book borrow request submitted successfully!");
+        setBorrowDialogOpen(false);
+        // Refresh book data to update available quantity
+        fetchBook();
+      }
+    } catch (error) {
+      toast.error(error.message || "Failed to submit borrow request");
+      console.error("Failed to borrow book:", error);
+    } finally {
+      setBorrowing(false);
     }
   };
 
@@ -131,16 +163,19 @@ export default function BookDetailPage() {
                     </h1>
                     <Badge
                       className={`shrink-0 ${
-                        book.availableQuantity > 0 
-                          ? "bg-green-600 hover:bg-green-700 text-white" 
+                        book.availableQuantity > 0
+                          ? "bg-green-600 hover:bg-green-700 text-white"
                           : "bg-red-600 hover:bg-red-700 text-white"
                       }`}
                     >
-                      {book.availableQuantity > 0 ? "Available" : "Not Available"}
+                      {book.availableQuantity > 0
+                        ? "Available"
+                        : "Not Available"}
                     </Badge>
                   </div>
                   <p className="text-lg text-muted-foreground mb-3">
-                    by {Array.isArray(book.author)
+                    by{" "}
+                    {Array.isArray(book.author)
                       ? book.author.join(", ")
                       : book.author}
                   </p>
@@ -165,7 +200,9 @@ export default function BookDetailPage() {
 
                 {/* About this book */}
                 <div>
-                  <h3 className="text-sm font-semibold mb-2">About this book</h3>
+                  <h3 className="text-sm font-semibold mb-2">
+                    About this book
+                  </h3>
                   <p className="text-sm text-muted-foreground leading-relaxed">
                     {book.description ||
                       "No description available for this book."}
@@ -212,7 +249,9 @@ export default function BookDetailPage() {
                     <div className="flex items-start gap-3">
                       <Globe className="h-4 w-4 text-muted-foreground mt-1 shrink-0" />
                       <div>
-                        <p className="text-xs text-muted-foreground">Language</p>
+                        <p className="text-xs text-muted-foreground">
+                          Language
+                        </p>
                         <p className="text-sm font-medium">
                           {Array.isArray(book.language)
                             ? book.language.join(", ")
@@ -225,7 +264,9 @@ export default function BookDetailPage() {
                     <div className="flex items-start gap-3">
                       <BookOpen className="h-4 w-4 text-muted-foreground mt-1 shrink-0" />
                       <div>
-                        <p className="text-xs text-muted-foreground">Location</p>
+                        <p className="text-xs text-muted-foreground">
+                          Location
+                        </p>
                         <p className="text-sm font-medium">
                           {Array.isArray(book.location)
                             ? book.location.join(", ")
@@ -243,15 +284,21 @@ export default function BookDetailPage() {
                   <h3 className="text-sm font-semibold mb-3">Availability</h3>
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-4">
                     <div className="text-center p-3 rounded-lg bg-muted/50">
-                      <p className={`text-xl font-bold ${
-                        book.availableQuantity > 0 ? "text-green-600" : "text-red-600"
-                      }`}>
+                      <p
+                        className={`text-xl font-bold ${
+                          book.availableQuantity > 0
+                            ? "text-green-600"
+                            : "text-red-600"
+                        }`}
+                      >
                         {book.availableQuantity}
                       </p>
                       <p className="text-xs text-muted-foreground">Available</p>
                     </div>
                     <div className="text-center p-3 rounded-lg bg-muted/50">
-                      <p className="text-xl font-bold">{book.quantity - book.availableQuantity}</p>
+                      <p className="text-xl font-bold">
+                        {book.quantity - book.availableQuantity}
+                      </p>
                       <p className="text-xs text-muted-foreground">Borrowed</p>
                     </div>
                     {book.location && (
@@ -261,16 +308,19 @@ export default function BookDetailPage() {
                             ? book.location.join(", ")
                             : book.location}
                         </p>
-                        <p className="text-xs text-muted-foreground">Location</p>
+                        <p className="text-xs text-muted-foreground">
+                          Location
+                        </p>
                       </div>
                     )}
                   </div>
-                  
+
                   {/* Button at the bottom */}
                   {isAuthenticated ? (
                     <Button
                       className="w-full"
                       disabled={book.availableQuantity === 0}
+                      onClick={() => setBorrowDialogOpen(true)}
                     >
                       {book.availableQuantity > 0
                         ? "Request to Borrow"
@@ -292,6 +342,51 @@ export default function BookDetailPage() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Borrow Confirmation Dialog */}
+      <Dialog open={borrowDialogOpen} onOpenChange={setBorrowDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Request to Borrow Book</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to borrow &ldquo;{book?.title}&rdquo;?
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <p className="text-sm text-muted-foreground">
+                <strong>Book:</strong> {book?.title}
+              </p>
+              <p className="text-sm text-muted-foreground">
+                <strong>Author:</strong>{" "}
+                {Array.isArray(book?.author)
+                  ? book?.author.join(", ")
+                  : book?.author}
+              </p>
+              <p className="text-sm text-muted-foreground">
+                <strong>ISBN:</strong> {book?.isbn}
+              </p>
+            </div>
+            <Separator />
+            <p className="text-sm text-muted-foreground">
+              The library staff will process your request. You will be notified
+              once it&apos;s approved.
+            </p>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setBorrowDialogOpen(false)}
+              disabled={borrowing}
+            >
+              Cancel
+            </Button>
+            <Button onClick={handleBorrowRequest} disabled={borrowing}>
+              {borrowing ? "Submitting..." : "Confirm Request"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
