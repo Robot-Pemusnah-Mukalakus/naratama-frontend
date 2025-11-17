@@ -132,7 +132,7 @@ export default function MembershipPage() {
     };
   };
 
-  const handleJoinMembership = async (membershipType = "PREMIUM") => {
+  const handleJoinMembership = async () => {
     if (!isAuthenticated) {
       toast.error("Please login to join membership");
       router.push("/auth/login");
@@ -146,10 +146,8 @@ export default function MembershipPage() {
 
     try {
       setLoading(true);
-      // Backend will get user from session/auth
-      const response = await paymentService.createMembershipPayment({
-        membershipType,
-      });
+      // Backend will get user from session/auth automatically via credentials
+      const response = await paymentService.createMembershipPayment();
 
       if (response.success && response.token) {
         // Redirect to payment gateway with the token

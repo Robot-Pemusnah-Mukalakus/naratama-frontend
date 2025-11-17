@@ -159,9 +159,8 @@ export const usersService = {
 };
 
 export const paymentService = {
-  // POST request because backend needs to create payment session
-  createMembershipPayment: (membershipData) =>
-    apiClient.post("/api/payment/membership", membershipData),
+  // POST request - user is obtained from session cookie automatically
+  createMembershipPayment: () => apiClient.post("/api/payment/membership"),
   createRoomPayment: (roomData) =>
     apiClient.post("/api/payment/room", roomData),
 };
