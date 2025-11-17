@@ -158,4 +158,11 @@ export const usersService = {
   deleteUser: (id) => apiClient.delete(`/api/users/${id}`),
 };
 
+export const paymentService = {
+  // POST request because backend needs to create payment session
+  createMembershipPayment: (membershipData) =>
+    apiClient.post("/api/payment/membership", membershipData),
+  createRoomPayment: (roomData) =>
+    apiClient.post("/api/payment/room", roomData),
+};
 export default apiClient;

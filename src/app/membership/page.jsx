@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
-import { usersService } from "@/lib/api";
+import { usersService, paymentService } from "@/lib/api";
 import {
   Card,
   CardContent,
@@ -32,12 +32,28 @@ export default function MembershipPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!authLoading && isAuthenticated && user) {
-      fetchUserDetails();
-    } else if (!authLoading && !isAuthenticated) {
-      setLoading(false);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+if (!authLoading && isAuthenticated && user) {
+    fetchUserDetails();
+
+    // Load Midtrans Snap
+    const midtransScriptUrl = 'https://app.sandbox.midtrans.com/snap/snap.js';
+    const scriptTag = document.createElement('script');
+    scriptTag.src = midtransScriptUrl;
+
+    const myMidtransClientKey = 'your-client-key-goes-here';
+    scriptTag.setAttribute('data-client-key', myMidtransClientKey);
+
+    document.body.appendChild(scriptTag);
+
+    return () => {
+      document.body.removeChild(scriptTag);
+    };
+  }
+
+  if (!authLoading && !isAuthenticated) {
+    setLoading(false);
+  }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAuthenticated, authLoading, user]);
 
   const fetchUserDetails = async () => {
@@ -128,13 +144,36 @@ export default function MembershipPage() {
     };
   };
 
-  const handleJoinMembership = () => {
+  const handleJoinMembership = async (membershipType = "PREMIUM") => {
     if (!isAuthenticated) {
       toast.error("Please login to join membership");
       router.push("/auth/login");
       return;
     }
-    toast.info("Membership upgrade feature coming soon!");
+
+    try {
+      setLoading(true);
+      // Backend will get user from session/auth
+      const response = await paymentService.createMembershipPayment({
+        membershipType,
+      });
+
+      if (response.success && response.token) {
+        // Redirect to payment gateway with the token
+        window.snap.pay(response.token, {
+          onSuccess: function (result) {
+            toast.success("Payment successful! Membership activated.");
+            fetchUserDetails();
+          }
+        });
+      }
+
+    } catch (error) {
+      console.error("Payment error:", error);
+      toast.error(error.message || "Failed to process payment");
+    } finally {
+      setLoading(false);
+    }
   };
 
   if (authLoading || loading) {
@@ -226,8 +265,12 @@ export default function MembershipPage() {
             <Button variant="outline" onClick={() => router.push("/dashboard")}>
               View Dashboard
             </Button>
-            <Button variant="outline" onClick={handleJoinMembership}>
-              Upgrade Plan
+            <Button
+              variant="outline"
+              onClick={() => handleJoinMembership("PREMIUM")}
+              disabled={loading}
+            >
+              {loading ? "Processing..." : "Upgrade Plan"}
             </Button>
           </CardFooter>
         </Card>
@@ -290,11 +333,15 @@ export default function MembershipPage() {
                 <Button
                   className="w-full"
                   variant={tier.popular ? "default" : "outline"}
-                  onClick={handleJoinMembership}
-                  disabled={isCurrentTier}
+                  onClick={() =>
+                    handleJoinMembership(tier.name.split(" ")[0].toUpperCase())
+                  }
+                  disabled={isCurrentTier || loading}
                 >
                   {isCurrentTier
                     ? "Current Plan"
+                    : loading
+                    ? "Processing..."
                     : isAuthenticated
                     ? "Select Plan"
                     : "Get Started"}
