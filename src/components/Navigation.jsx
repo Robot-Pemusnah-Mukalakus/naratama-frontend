@@ -37,6 +37,7 @@ export default function Navigation() {
     { href: "/books", label: "Books", icon: BookOpen },
     { href: "/announcements", label: "Announcements", icon: Bell },
     { href: "/rooms", label: "Rooms", icon: DoorOpen },
+    { href: "/membership", label: "Membership", icon: User },
   ];
 
   const getInitials = (name) => {
