@@ -48,6 +48,7 @@ export default function MembershipPage() {
     setLoading(true);
     try {
       const response = await usersService.getCurrentUser();
+      console.log("User details:", response);
       if (response.success && response.user) {
         setUserDetails(response.user);
       }
