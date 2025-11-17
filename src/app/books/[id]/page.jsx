@@ -43,6 +43,8 @@ export default function BookDetailPage() {
   const [loading, setLoading] = useState(true);
   const [borrowDialogOpen, setBorrowDialogOpen] = useState(false);
   const [borrowing, setBorrowing] = useState(false);
+  const [paymentRequired, setPaymentRequired] = useState(false);
+  const [paymentDetails, setPaymentDetails] = useState(null);
 
   useEffect(() => {
     if (params.id) {
@@ -68,6 +70,9 @@ export default function BookDetailPage() {
 
   const handleBorrowRequest = async () => {
     setBorrowing(true);
+    setPaymentRequired(false);
+    setPaymentDetails(null);
+
     try {
       const response = await bookLoansService.createLoan({
         userId: user.id,
@@ -75,14 +80,28 @@ export default function BookDetailPage() {
       });
 
       if (response.success) {
-        toast.success("Book borrow request submitted successfully!");
+        // Check if membership was used for auto-approval
+        if (response.membershipApproved) {
+          toast.success("Book loan approved! (Active membership benefit)");
+        } else {
+          toast.success("Book borrow request submitted successfully!");
+        }
         setBorrowDialogOpen(false);
         // Refresh book data to update available quantity
         fetchBook();
       }
     } catch (error) {
-      toast.error(error.message || "Failed to submit borrow request");
-      console.error("Failed to borrow book:", error);
+      // Handle 402 Payment Required for non-members
+      if (error.status === 402 || error.response?.status === 402) {
+        const errorData = error.response?.data || error;
+        setPaymentRequired(true);
+        setPaymentDetails(errorData.paymentDetails);
+        toast.warning("Payment required to complete borrow request");
+      } else {
+        toast.error(error.message || "Failed to submit borrow request");
+        console.error("Failed to borrow book:", error);
+        setBorrowDialogOpen(false);
+      }
     } finally {
       setBorrowing(false);
     }
@@ -349,41 +368,83 @@ export default function BookDetailPage() {
           <DialogHeader>
             <DialogTitle>Request to Borrow Book</DialogTitle>
             <DialogDescription>
-              Are you sure you want to borrow &ldquo;{book?.title}&rdquo;?
+              {paymentRequired
+                ? "Payment required to complete your borrow request"
+                : `Are you sure you want to borrow "${book?.title}"?`}
             </DialogDescription>
           </DialogHeader>
-          <div className="space-y-4 py-4">
-            <div className="space-y-2">
+
+          {paymentRequired && paymentDetails ? (
+            <div className="space-y-4 py-4">
+              <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4">
+                <h4 className="font-semibold text-yellow-900 dark:text-yellow-100 mb-2">
+                  Payment Required
+                </h4>
+                <p className="text-sm text-yellow-800 dark:text-yellow-200 mb-3">
+                  {paymentDetails.description}
+                </p>
+                <div className="space-y-2">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-yellow-700 dark:text-yellow-300">
+                      Commitment Fee:
+                    </span>
+                    <span className="font-semibold text-yellow-900 dark:text-yellow-100">
+                      Rp {paymentDetails.amount?.toLocaleString("id-ID")}
+                    </span>
+                  </div>
+                </div>
+              </div>
+              <Separator />
               <p className="text-sm text-muted-foreground">
-                <strong>Book:</strong> {book?.title}
+                💡 <strong>Tip:</strong> Get an active membership to skip
+                commitment fees and enjoy auto-approved book loans!
               </p>
               <p className="text-sm text-muted-foreground">
-                <strong>Author:</strong>{" "}
-                {Array.isArray(book?.author)
-                  ? book?.author.join(", ")
-                  : book?.author}
-              </p>
-              <p className="text-sm text-muted-foreground">
-                <strong>ISBN:</strong> {book?.isbn}
+                Please contact the library staff to complete the payment
+                process.
               </p>
             </div>
-            <Separator />
-            <p className="text-sm text-muted-foreground">
-              The library staff will process your request. You will be notified
-              once it&apos;s approved.
-            </p>
-          </div>
+          ) : (
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <p className="text-sm text-muted-foreground">
+                  <strong>Book:</strong> {book?.title}
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  <strong>Author:</strong>{" "}
+                  {Array.isArray(book?.author)
+                    ? book?.author.join(", ")
+                    : book?.author}
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  <strong>ISBN:</strong> {book?.isbn}
+                </p>
+              </div>
+              <Separator />
+              <p className="text-sm text-muted-foreground">
+                The library staff will process your request. You will be
+                notified once it&apos;s approved.
+              </p>
+            </div>
+          )}
+
           <DialogFooter>
             <Button
               variant="outline"
-              onClick={() => setBorrowDialogOpen(false)}
+              onClick={() => {
+                setBorrowDialogOpen(false);
+                setPaymentRequired(false);
+                setPaymentDetails(null);
+              }}
               disabled={borrowing}
             >
-              Cancel
+              {paymentRequired ? "Close" : "Cancel"}
             </Button>
-            <Button onClick={handleBorrowRequest} disabled={borrowing}>
-              {borrowing ? "Submitting..." : "Confirm Request"}
-            </Button>
+            {!paymentRequired && (
+              <Button onClick={handleBorrowRequest} disabled={borrowing}>
+                {borrowing ? "Submitting..." : "Confirm Request"}
+              </Button>
+            )}
           </DialogFooter>
         </DialogContent>
       </Dialog>

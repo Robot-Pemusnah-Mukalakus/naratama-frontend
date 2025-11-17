@@ -33,6 +33,8 @@ export default function RoomsPage() {
   const [loading, setLoading] = useState(true);
   const [bookingDialogOpen, setBookingDialogOpen] = useState(false);
   const [selectedRoom, setSelectedRoom] = useState(null);
+  const [paymentRequired, setPaymentRequired] = useState(false);
+  const [paymentDetails, setPaymentDetails] = useState(null);
   const [bookingForm, setBookingForm] = useState({
     bookingDate: "",
     startTime: "",
@@ -41,78 +43,94 @@ export default function RoomsPage() {
     specialRequests: "",
   });
 
-      // -- FILTER STATES --
-      const [capacity, setCapacity] = useState(""); // "", "5", "10", "20", ">30"
-      const [availability, setAvailability] = useState(""); // "", "available", "not_available"
+  // -- FILTER STATES --
+  const [capacity, setCapacity] = useState(""); // "", "5", "10", "20", ">30"
+  const [availability, setAvailability] = useState(""); // "", "available", "not_available"
 
-      useEffect(() => {
-      fetchRooms();
-      }, []);
+  useEffect(() => {
+    fetchRooms();
+  }, []);
 
-      const fetchRooms = async () => {
-      setLoading(true);
-      try {
-        const response = await roomsService.getRooms({ available: "true" });
-          if (response.success) {
-            setRooms(response.data || []);
-          }
-      } catch (error) {
-        toast.error("Failed to load rooms");
-        console.error("Failed to fetch rooms:", error);
-      } finally {
-      setLoading(false);
+  const fetchRooms = async () => {
+    setLoading(true);
+    try {
+      const response = await roomsService.getRooms({ available: "true" });
+      if (response.success) {
+        setRooms(response.data || []);
       }
+    } catch (error) {
+      toast.error("Failed to load rooms");
+      console.error("Failed to fetch rooms:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleBookRoom = (room) => {
+    if (!isAuthenticated) {
+      toast.error("Please login to book a room");
+      return;
+    }
+    setSelectedRoom(room);
+    setBookingDialogOpen(true);
+  };
+
+  const handleSubmitBooking = async (e) => {
+    e.preventDefault();
+    setPaymentRequired(false);
+    setPaymentDetails(null);
+
+    try {
+      const bookingDate = new Date(
+        bookingForm.bookingDate + "T00:00:00"
+      ).toISOString();
+      const startTime = new Date(
+        bookingForm.bookingDate + "T" + bookingForm.startTime + ":00"
+      ).toISOString();
+      const endTime = new Date(
+        bookingForm.bookingDate + "T" + bookingForm.endTime + ":00"
+      ).toISOString();
+
+      const bookingData = {
+        userId: user.id,
+        roomId: selectedRoom.id,
+        bookingDate,
+        startTime,
+        endTime,
+        purpose: bookingForm.purpose,
+        specialRequests: bookingForm.specialRequests || undefined,
       };
 
-      const handleBookRoom = (room) => {
-        if (!isAuthenticated) {
-          toast.error("Please login to book a room");
-        return;
+      const response = await roomsService.createBooking(bookingData);
+      if (response.success) {
+        // Check if membership was used for auto-confirmation
+        if (response.membershipApproved) {
+          toast.success("Room booking confirmed! (Active membership benefit)");
+        } else {
+          toast.success("Room booking request submitted successfully!");
         }
-        setSelectedRoom(room);
-        setBookingDialogOpen(true);
-      };
-
-      const handleSubmitBooking = async (e) => {
-      e.preventDefault();
-
-      try {
-        const bookingDate = new Date(
-          bookingForm.bookingDate + "T00:00:00"
-        ).toISOString();
-        const startTime = new Date(
-          bookingForm.bookingDate + "T" + bookingForm.startTime + ":00"
-        ).toISOString();
-        const endTime = new Date(
-          bookingForm.bookingDate + "T" + bookingForm.endTime + ":00"
-        ).toISOString();
-
-        const bookingData = {
-          userId: user.id,
-          roomId: selectedRoom.id,
-          bookingDate,
-          startTime,
-          endTime,
-          purpose: bookingForm.purpose,
-          specialRequests: bookingForm.specialRequests || undefined,
-        };
-
-        const response = await roomsService.createBooking(bookingData);
-          if (response.success) {
-            toast.success("Room booking request submitted successfully!");
-            setBookingDialogOpen(false);
-            setBookingForm({
-              bookingDate: "",
-              startTime: "",
-              endTime: "",
-              purpose: "",
-              specialRequests: "",
-            });
-          }
-      } catch (error) {
+        setBookingDialogOpen(false);
+        setBookingForm({
+          bookingDate: "",
+          startTime: "",
+          endTime: "",
+          purpose: "",
+          specialRequests: "",
+        });
+      }
+    } catch (error) {
+      // Handle 402 Payment Required for non-members
+      if (error.status === 402 || error.response?.status === 402) {
+        const errorData = error.response?.data || error;
+        setPaymentRequired(true);
+        setPaymentDetails(errorData.paymentDetails);
+        toast.warning("Payment required to complete booking");
+      } else {
         toast.error(error.message || "Failed to create booking");
         console.error("Failed to create booking:", error);
+        setBookingDialogOpen(false);
       }
+    }
   };
 
   const getRoomTypeLabel = (type) => {
@@ -126,93 +144,93 @@ export default function RoomsPage() {
     }
   };
 
-        // --- Filtering logic ---
-        const filteredRooms = rooms.filter((room) => {
-          // Capacity filter: interpret as "minimum capacity required"
-          if (capacity) {
-            if (capacity === ">30") {
-              if (!(room.capacity > 30)) return false;
-            } else {
-              const min = parseInt(capacity, 10);
-              if (Number.isFinite(min) && room.capacity < min) return false;
-            }
-          }
+  // --- Filtering logic ---
+  const filteredRooms = rooms.filter((room) => {
+    // Capacity filter: interpret as "minimum capacity required"
+    if (capacity) {
+      if (capacity === ">30") {
+        if (!(room.capacity > 30)) return false;
+      } else {
+        const min = parseInt(capacity, 10);
+        if (Number.isFinite(min) && room.capacity < min) return false;
+      }
+    }
 
-          // Availability filter
-          if (availability) {
-            if (availability === "available" && !room.isAvailable) return false;
-            if (availability === "not_available" && room.isAvailable) return false;
-          }
+    // Availability filter
+    if (availability) {
+      if (availability === "available" && !room.isAvailable) return false;
+      if (availability === "not_available" && room.isAvailable) return false;
+    }
 
-          return true;
-        });
+    return true;
+  });
 
-      return (
-        <div className="container mx-auto px-4 py-8">
-          <div className="mb-8">
-            <h1 className="text-4xl font-bold mb-2">Study Rooms</h1>
-            <p className="text-muted-foreground">
-            Book a room for your study sessions or meetings
-            </p>
-          </div>
-
-            {/* Filters */}
-    <div className="flex flex-wrap gap-4 mb-8 items-end">
-      {/* Capacity Filter */}
-      <div className="flex flex-col">
-        <label className="text-sm font-medium mb-1">Capacity (min)</label>
-        <select
-          aria-label="Filter by capacity"
-          value={capacity}
-          onChange={(e) => setCapacity(e.target.value)}
-          className="border rounded-xl px-4 py-2 bg-white"
-        >
-          <option value="">All Capacities</option>
-          <option value="5">5</option>
-          <option value="10">10</option>
-          <option value="20">20</option>
-          <option value=">30">&gt; 30</option>
-        </select>
+  return (
+    <div className="container mx-auto px-4 py-8">
+      <div className="mb-8">
+        <h1 className="text-4xl font-bold mb-2">Study Rooms</h1>
+        <p className="text-muted-foreground">
+          Book a room for your study sessions or meetings
+        </p>
       </div>
 
-      {/* Availability Filter */}
-      <div className="flex flex-col">
-        <label className="text-sm font-medium mb-1 flex items-center gap-2">
-          Availability
-          {availability === "available" && (
-            <CheckCircle className="h-4 w-4 text-emerald-600" />
-          )}
-          {availability === "not_available" && (
-          <XCircle className="h-4 w-4 text-rose-600" />
-          )}
-        </label>
+      {/* Filters */}
+      <div className="flex flex-wrap gap-4 mb-8 items-end">
+        {/* Capacity Filter */}
+        <div className="flex flex-col">
+          <label className="text-sm font-medium mb-1">Capacity (min)</label>
+          <select
+            aria-label="Filter by capacity"
+            value={capacity}
+            onChange={(e) => setCapacity(e.target.value)}
+            className="border rounded-xl px-4 py-2 bg-white"
+          >
+            <option value="">All Capacities</option>
+            <option value="5">5</option>
+            <option value="10">10</option>
+            <option value="20">20</option>
+            <option value=">30">&gt; 30</option>
+          </select>
+        </div>
 
-        <select
-          aria-label="Filter by availability"
-          value={availability}
-          onChange={(e) => setAvailability(e.target.value)}
-          className="border rounded-xl px-4 py-2 bg-white"
-        >
-          <option value="">All</option>
-          <option value="available">Available</option>
-          <option value="not_available">Not Available</option>
-        </select>
-      </div>
+        {/* Availability Filter */}
+        <div className="flex flex-col">
+          <label className="text-sm font-medium mb-1 flex items-center gap-2">
+            Availability
+            {availability === "available" && (
+              <CheckCircle className="h-4 w-4 text-emerald-600" />
+            )}
+            {availability === "not_available" && (
+              <XCircle className="h-4 w-4 text-rose-600" />
+            )}
+          </label>
 
-      {/* Reset Filters button */}
-      <div className="flex items-center">
-        <Button
-          variant="outline"
-          className="transition-colors duration-200 hover:bg-black hover:text-white"
-          onClick={() => {
-            setCapacity("");
-            setAvailability("");
-          }}
-        >
-          Reset Filters
-        </Button>
+          <select
+            aria-label="Filter by availability"
+            value={availability}
+            onChange={(e) => setAvailability(e.target.value)}
+            className="border rounded-xl px-4 py-2 bg-white"
+          >
+            <option value="">All</option>
+            <option value="available">Available</option>
+            <option value="not_available">Not Available</option>
+          </select>
+        </div>
+
+        {/* Reset Filters button */}
+        <div className="flex items-center">
+          <Button
+            variant="outline"
+            className="transition-colors duration-200 hover:bg-black hover:text-white"
+            onClick={() => {
+              setCapacity("");
+              setAvailability("");
+            }}
+          >
+            Reset Filters
+          </Button>
+        </div>
       </div>
-  </div>
 
       {loading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -252,12 +270,18 @@ export default function RoomsPage() {
                   <div className="flex items-center gap-2">
                     {/* availability badge with icon */}
                     {room.isAvailable ? (
-                      <Badge variant="default" className="gap-1 flex items-center">
+                      <Badge
+                        variant="default"
+                        className="gap-1 flex items-center"
+                      >
                         <CheckCircle className="h-3 w-3 text-emerald-600" />
                         Available
                       </Badge>
                     ) : (
-                      <Badge variant="outline" className="gap-1 flex items-center">
+                      <Badge
+                        variant="outline"
+                        className="gap-1 flex items-center"
+                      >
                         <XCircle className="h-3 w-3 text-rose-600" />
                         Not Available
                       </Badge>
@@ -267,7 +291,8 @@ export default function RoomsPage() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <p className="text-sm text-muted-foreground">
-                  {room.description || "A comfortable space for your study needs."}
+                  {room.description ||
+                    "A comfortable space for your study needs."}
                 </p>
 
                 <div className="space-y-2">
@@ -311,102 +336,174 @@ export default function RoomsPage() {
           <DialogHeader>
             <DialogTitle>Book {selectedRoom?.name}</DialogTitle>
             <DialogDescription>
-              Fill in the details for your room booking
+              {paymentRequired
+                ? "Payment required to complete your booking"
+                : "Fill in the details for your room booking"}
             </DialogDescription>
           </DialogHeader>
-          <form onSubmit={handleSubmitBooking} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="bookingDate">Date</Label>
-              <Input
-                id="bookingDate"
-                type="date"
-                value={bookingForm.bookingDate}
-                onChange={(e) =>
-                  setBookingForm({
-                    ...bookingForm,
-                    bookingDate: e.target.value,
-                  })
-                }
-                required
-                min={new Date().toISOString().split("T")[0]}
-              />
-            </div>
 
-            <div className="grid grid-cols-2 gap-4">
+          {paymentRequired && paymentDetails ? (
+            <div className="space-y-4">
+              <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4">
+                <h4 className="font-semibold text-yellow-900 dark:text-yellow-100 mb-2">
+                  Payment Required
+                </h4>
+                <p className="text-sm text-yellow-800 dark:text-yellow-200 mb-3">
+                  {paymentDetails.description}
+                </p>
+                <div className="space-y-2">
+                  {paymentDetails.commitmentFee && (
+                    <div className="flex justify-between text-sm">
+                      <span className="text-yellow-700 dark:text-yellow-300">
+                        Commitment Fee:
+                      </span>
+                      <span className="font-medium text-yellow-900 dark:text-yellow-100">
+                        Rp{" "}
+                        {paymentDetails.commitmentFee?.toLocaleString("id-ID")}
+                      </span>
+                    </div>
+                  )}
+                  {paymentDetails.bookingFee && (
+                    <div className="flex justify-between text-sm">
+                      <span className="text-yellow-700 dark:text-yellow-300">
+                        Booking Fee:
+                      </span>
+                      <span className="font-medium text-yellow-900 dark:text-yellow-100">
+                        Rp {paymentDetails.bookingFee?.toLocaleString("id-ID")}
+                      </span>
+                    </div>
+                  )}
+                  <div className="flex justify-between text-sm pt-2 border-t border-yellow-300 dark:border-yellow-700">
+                    <span className="font-semibold text-yellow-900 dark:text-yellow-100">
+                      Total:
+                    </span>
+                    <span className="font-bold text-yellow-900 dark:text-yellow-100">
+                      Rp {paymentDetails.amount?.toLocaleString("id-ID")}
+                    </span>
+                  </div>
+                </div>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                💡 <strong>Tip:</strong> Get an active membership to skip
+                commitment fees and enjoy auto-confirmed room bookings!
+              </p>
+              <p className="text-sm text-muted-foreground">
+                Please contact the library staff to complete the payment
+                process.
+              </p>
+              <div className="flex gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="flex-1"
+                  onClick={() => {
+                    setBookingDialogOpen(false);
+                    setPaymentRequired(false);
+                    setPaymentDetails(null);
+                  }}
+                >
+                  Close
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <form onSubmit={handleSubmitBooking} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="startTime">Start Time</Label>
+                <Label htmlFor="bookingDate">Date</Label>
                 <Input
-                  id="startTime"
-                  type="time"
-                  value={bookingForm.startTime}
+                  id="bookingDate"
+                  type="date"
+                  value={bookingForm.bookingDate}
                   onChange={(e) =>
                     setBookingForm({
                       ...bookingForm,
-                      startTime: e.target.value,
+                      bookingDate: e.target.value,
                     })
                   }
                   required
+                  min={new Date().toISOString().split("T")[0]}
                 />
               </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="startTime">Start Time</Label>
+                  <Input
+                    id="startTime"
+                    type="time"
+                    value={bookingForm.startTime}
+                    onChange={(e) =>
+                      setBookingForm({
+                        ...bookingForm,
+                        startTime: e.target.value,
+                      })
+                    }
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="endTime">End Time</Label>
+                  <Input
+                    id="endTime"
+                    type="time"
+                    value={bookingForm.endTime}
+                    onChange={(e) =>
+                      setBookingForm({
+                        ...bookingForm,
+                        endTime: e.target.value,
+                      })
+                    }
+                    required
+                  />
+                </div>
+              </div>
+
               <div className="space-y-2">
-                <Label htmlFor="endTime">End Time</Label>
+                <Label htmlFor="purpose">Purpose</Label>
                 <Input
-                  id="endTime"
-                  type="time"
-                  value={bookingForm.endTime}
+                  id="purpose"
+                  placeholder="e.g., Group study, Meeting"
+                  value={bookingForm.purpose}
                   onChange={(e) =>
-                    setBookingForm({ ...bookingForm, endTime: e.target.value })
+                    setBookingForm({ ...bookingForm, purpose: e.target.value })
                   }
                   required
                 />
               </div>
-            </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="purpose">Purpose</Label>
-              <Input
-                id="purpose"
-                placeholder="e.g., Group study, Meeting"
-                value={bookingForm.purpose}
-                onChange={(e) =>
-                  setBookingForm({ ...bookingForm, purpose: e.target.value })
-                }
-                required
-              />
-            </div>
+              <div className="space-y-2">
+                <Label htmlFor="specialRequests">
+                  Special Requests (Optional)
+                </Label>
+                <Textarea
+                  id="specialRequests"
+                  placeholder="Any special requirements..."
+                  value={bookingForm.specialRequests}
+                  onChange={(e) =>
+                    setBookingForm({
+                      ...bookingForm,
+                      specialRequests: e.target.value,
+                    })
+                  }
+                  rows={3}
+                />
+              </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="specialRequests">
-                Special Requests (Optional)
-              </Label>
-              <Textarea
-                id="specialRequests"
-                placeholder="Any special requirements..."
-                value={bookingForm.specialRequests}
-                onChange={(e) =>
-                  setBookingForm({
-                    ...bookingForm,
-                    specialRequests: e.target.value,
-                  })
-                }
-                rows={3}
-              />
-            </div>
-
-            <div className="flex gap-2">
-              <Button
-                type="button"
-                variant="outline"
-                className="flex-1"
-                onClick={() => setBookingDialogOpen(false)}
-              >
-                Cancel
-              </Button>
-              <Button type="submit" className="flex-1">
-                Submit Booking
-              </Button>
-            </div>
-          </form>
+              <div className="flex gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="flex-1"
+                  onClick={() => setBookingDialogOpen(false)}
+                >
+                  Cancel
+                </Button>
+                <Button type="submit" className="flex-1">
+                  Submit Booking
+                </Button>
+              </div>
+            </form>
+          )}
         </DialogContent>
       </Dialog>
     </div>
