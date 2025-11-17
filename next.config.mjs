@@ -30,7 +30,7 @@ const nextConfig = {
             key: "Content-Security-Policy",
             value: `
               default-src 'self';
-              script-src 'self' 'unsafe-eval' https://app.sandbox.midtrans.com https://snap-assets.al-pc-id-b.cdn.gtflabs.io;
+              script-src 'self' 'unsafe-eval' 'unsafe-inline' https://app.sandbox.midtrans.com https://snap-assets.al-pc-id-b.cdn.gtflabs.io;
               frame-src https://app.sandbox.midtrans.com https://app.midtrans.com;
               connect-src 'self' https://app.sandbox.midtrans.com https://api.naratama.runsha.dev;
               img-src 'self' data: https:;
