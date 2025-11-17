@@ -49,9 +49,9 @@ export default function MembershipPage() {
     try {
       const response = await usersService.getCurrentUser();
       console.log("User details:", response);
-      console.log("User membership:", response?.user?.membership);
-      if (response.success && response.user) {
-        setUserDetails(response.user);
+      console.log("User membership:", response?.data?.membership);
+      if (response.success && response.data) {
+        setUserDetails(response.data);
       }
     } catch (error) {
       console.error("Failed to fetch user details:", error);
