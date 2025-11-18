@@ -185,34 +185,42 @@ export default function RoomsPage() {
       const response = await roomsService.createBooking(bookingData);
       if (response.success) {
         // Payment ALAMAK BANYAKNYE PEKERJAAN AWAK
-        window.snap.pay(response.token, {
-          onSuccess: async function (result) {
-            // Notify backend to finalize booking after payment
-            const res = await roomsService.finishRoomPayment(
-              user.id,
-              result.order_id
-            );
-
-            if (res.success) {
-              toast.success("Payment successful! Membership activated.");
-              fetchUserDetails();
-            } else {
-              toast.error(
-                res.message || "Failed to activate membership after payment"
-              );
-            }
-          },
-          onPending: function (result) {
-            toast.info("Payment is pending. Please complete the payment.");
-          },
-          onError: function (result) {
-            console.error("Payment error:", result);
-            toast.error("Payment failed. Please try again.");
-          },
-          onClose: function () {
-            toast.info("Payment cancelled.");
-          },
+        const paymentResult = await new Promise((resolve, reject) => {
+          window.snap.pay(response.token, {
+            onSuccess: function (result) {
+              resolve({ status: 'success', result });
+            },
+            onPending: function (result) {
+              resolve({ status: 'pending', result });
+            },
+            onError: function (result) {
+              reject({ status: 'error', result });
+            },
+            onClose: function () {
+              resolve({ status: 'closed' });
+            },
+          });
         });
+
+        if (paymentResult.status === 'success') {
+          const res = await roomsService.finishRoomPayment(
+            user.id,
+            paymentResult.result.order_id
+          );
+
+          if (res.success) {
+            toast.success("Payment successful! Booking confirmed.");
+            fetchRooms();
+          } else {
+            toast.error(
+              res.message || "Failed to confirm booking after payment"
+            );
+          }
+        } else if (paymentResult.status === 'pending') {
+          toast.info("Payment is pending. Please complete the payment.");
+        } else if (paymentResult.status === 'closed') {
+          toast.info("Payment cancelled.");
+        }
         setBookingDialogOpen(false);
         setBookingForm({
           bookingDate: "",
