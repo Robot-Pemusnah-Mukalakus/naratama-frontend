@@ -179,11 +179,11 @@ export default function RoomsPage() {
       };
 
       const response = await roomsService.createBooking(bookingData);
-
-      if (response.success && response.data.paymentToken) {
+      const paymentToken = response?.data?.data?.paymentToken;
+      if (response.success && paymentToken) {
         // Payment required - trigger Midtrans payment
         const paymentResult = await new Promise((resolve, reject) => {
-          window.snap.pay(response.data.paymentToken, {
+          window.snap.pay(paymentToken, {
             onSuccess: function (result) {
               resolve({ status: "success", result });
             },
@@ -229,7 +229,7 @@ export default function RoomsPage() {
         }
       } else if (response.success) {
         // No payment required - booking confirmed directly
-        toast.success("Booking confirmed successfully!");
+        toast.success("Booking confirmed no payment required!");
         setBookingDialogOpen(false);
         setBookingForm({
           bookingDate: "",
