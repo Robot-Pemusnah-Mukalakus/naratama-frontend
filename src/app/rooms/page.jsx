@@ -181,7 +181,7 @@ export default function RoomsPage() {
       // Payment flow
       if (response.success && paymentToken) {
         const paymentResult = await new Promise((resolve, reject) => {
-          console.log("Invoking payment with token:", paymentToken);
+          setBookingDialogOpen(false);
           window.snap.pay(paymentToken, {
             onSuccess: (result) => resolve({ status: "success", result }),
             onPending: (result) => resolve({ status: "pending", result }),
