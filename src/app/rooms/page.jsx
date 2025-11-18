@@ -176,6 +176,7 @@ const handleSubmitBooking = async (e) => {
     // Payment flow
     if (response.success && paymentToken) {
       const paymentResult = await new Promise((resolve, reject) => {
+        console.log("Invoking payment with token:", paymentToken);
         window.snap.pay(paymentToken, {
           onSuccess: (result) => resolve({ status: "success", result }),
           onPending: (result) => resolve({ status: "pending", result }),
@@ -184,6 +185,9 @@ const handleSubmitBooking = async (e) => {
         });
       });
 
+      console.log("Whoops skipped over the payment womp womp");
+      console.log("Payment result:", paymentResult);
+
       if (paymentResult.status === "success") {
         const finishRes = await paymentService.finishRoomPayment(
           user.id,
@@ -191,6 +195,7 @@ const handleSubmitBooking = async (e) => {
         );
 
         if (finishRes.success) {
+          console.log("womp womp im at finishRes.success:", finishRes);
           toast.success("Payment successful! Your booking is confirmed.");
           setBookingDialogOpen(false);
           resetBookingForm();
@@ -213,6 +218,7 @@ const handleSubmitBooking = async (e) => {
 
     // NO PAYMENT REQUIRED
     if (response.success) {
+      console.log("Booking confirmed without payment womp womp:", response);
       toast.success("Booking confirmed. No payment required.");
       setBookingDialogOpen(false);
       resetBookingForm();
