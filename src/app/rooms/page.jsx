@@ -148,103 +148,95 @@ export default function RoomsPage() {
 
     return true;
   };
+const handleSubmitBooking = async (e) => {
+  e.preventDefault();
 
-  const handleSubmitBooking = async (e) => {
-    e.preventDefault();
+  // Validate before doing anything expensive
+  if (!validateBookingForm()) return;
 
-    // Validasi form dulu
-    if (!validateBookingForm()) {
-      return;
-    }
+  try {
+    
+    const bookingDate = new Date(`${bookingForm.bookingDate}T00:00:00`).toISOString();
+    const startTime = new Date(`${bookingForm.bookingDate}T${bookingForm.startTime}:00`).toISOString();
+    const endTime = new Date(`${bookingForm.bookingDate}T${bookingForm.endTime}:00`).toISOString();
 
-    try {
-      const bookingDate = new Date(
-        bookingForm.bookingDate + "T00:00:00"
-      ).toISOString();
-      const startTime = new Date(
-        bookingForm.bookingDate + "T" + bookingForm.startTime + ":00"
-      ).toISOString();
-      const endTime = new Date(
-        bookingForm.bookingDate + "T" + bookingForm.endTime + ":00"
-      ).toISOString();
+    const bookingData = {
+      userId: user.id,
+      roomId: selectedRoom.id,
+      bookingDate,
+      startTime,
+      endTime,
+      purpose: bookingForm.purpose,
+      specialRequests: bookingForm.specialRequests || undefined,
+    };
 
-      const bookingData = {
-        userId: user.id,
-        roomId: selectedRoom.id,
-        bookingDate,
-        startTime,
-        endTime,
-        purpose: bookingForm.purpose,
-        specialRequests: bookingForm.specialRequests || undefined,
-      };
+    const response = await roomsService.createBooking(bookingData);
+    const paymentToken = response?.data?.paymentToken;
 
-      const response = await roomsService.createBooking(bookingData);
-      const paymentToken = response?.data?.paymentToken;
-      if (response.success && paymentToken) {
-        // Payment required - trigger Midtrans payment
-        const paymentResult = await new Promise((resolve, reject) => {
-          window.snap.pay(paymentToken, {
-            onSuccess: function (result) {
-              resolve({ status: "success", result });
-            },
-            onPending: function (result) {
-              resolve({ status: "pending", result });
-            },
-            onError: function (result) {
-              reject({ status: "error", result });
-            },
-            onClose: function () {
-              resolve({ status: "closed" });
-            },
-          });
+    // Payment flow
+    if (response.success && paymentToken) {
+      const paymentResult = await new Promise((resolve, reject) => {
+        window.snap.pay(paymentToken, {
+          onSuccess: (result) => resolve({ status: "success", result }),
+          onPending: (result) => resolve({ status: "pending", result }),
+          onError: (result) => reject({ status: "error", result }),
+          onClose: () => resolve({ status: "closed" }),
         });
+      });
 
-        if (paymentResult.status === "success") {
-          const res = await paymentService.finishRoomPayment(
-            user.id,
-            paymentResult.result.order_id
-          );
+      if (paymentResult.status === "success") {
+        const finishRes = await paymentService.finishRoomPayment(
+          user.id,
+          paymentResult.result.order_id
+        );
 
-          if (res.success) {
-            toast.success("Payment successful! Booking confirmed.");
-            setBookingDialogOpen(false);
-            setBookingForm({
-              bookingDate: "",
-              startTime: "",
-              endTime: "",
-              purpose: "",
-              specialRequests: "",
-            });
-            fetchRooms();
-          } else {
-            toast.error(
-              res.message || "Failed to confirm booking after payment"
-            );
-          }
-        } else if (paymentResult.status === "pending") {
-          toast.info("Payment is pending. Please complete the payment.");
+        if (finishRes.success) {
+          toast.success("Payment successful! Your booking is confirmed.");
           setBookingDialogOpen(false);
-        } else if (paymentResult.status === "closed") {
-          toast.info("Payment cancelled.");
+          resetBookingForm();
+          fetchRooms();
+        } else {
+          toast.error(finishRes.message || "Payment succeeded, but booking confirmation failed.");
         }
-      } else if (response.success) {
-        // No payment required - booking confirmed directly
-        toast.success("Booking confirmed no payment required!");
+
+      } else if (paymentResult.status === "pending") {
+        toast.info("Payment is pending. Please complete your transaction.");
         setBookingDialogOpen(false);
-        setBookingForm({
-          bookingDate: "",
-          startTime: "",
-          endTime: "",
-          purpose: "",
-          specialRequests: "",
-        });
-        fetchRooms();
+
+      } else if (paymentResult.status === "closed") {
+        toast.info("The payment window was closed.");
+
       }
-    } catch (error) {
-      toast.error(error.message || "Failed to create booking");
-      console.error("Failed to create booking:", error);
+
+      return; 
     }
-  };
+
+    // NO PAYMENT REQUIRED
+    if (response.success) {
+      toast.success("Booking confirmed. No payment required.");
+      setBookingDialogOpen(false);
+      resetBookingForm();
+      fetchRooms();
+    }
+
+  } catch (error) {
+    console.error("Booking creation error:", error);
+    toast.error(error.message || "An error occurred while processing your booking.");
+  }
+};
+
+
+// Utility to reset form
+function resetBookingForm() {
+  setBookingForm({
+    bookingDate: "",
+    startTime: "",
+    endTime: "",
+    purpose: "",
+    specialRequests: "",
+  });
+}
+
 
   const getRoomTypeLabel = (type) => {
     switch (type) {
