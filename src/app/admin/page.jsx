@@ -51,7 +51,8 @@ export default function AdminDashboard() {
     try {
       // Fetch all stats in parallel
       const [
-        booksResponse,
+        allBooksResponse,
+        availableBooksResponse,
         loansResponse,
         overdueResponse,
         usersResponse,
@@ -59,26 +60,25 @@ export default function AdminDashboard() {
         bookingsResponse,
         announcementsResponse,
       ] = await Promise.all([
-        booksService.getBooks({ limit: 1 }),
-        bookLoansService.getLoans({ limit: 5 }),
+        booksService.getBooks({ limit: 1 }), // Just for total count
+        booksService.getBooks({ limit: 1, available: "true" }), // Just for available count
+        bookLoansService.getLoans({ limit: 5 }), // Get recent loans
         bookLoansService.getOverdueLoans(),
-        usersService.getUsers({}),
-        usersService.getUsers({ isMember: "true" }),
-        roomsService.getBookings({ status: "PENDING" }),
+        usersService.getUsers({ limit: 1 }), // Just for total count
+        usersService.getUsers({ limit: 1, isMember: "true" }), // Just for member count
+        roomsService.getBookings({ limit: 1, status: "PENDING" }), // Just for count
         announcementsService.getAnnouncements({ limit: 1 }),
       ]);
 
       setStats({
-        totalBooks: booksResponse.pagination?.total || 0,
-        availableBooks:
-          booksResponse.data?.filter((b) => b.availableQuantity > 0).length ||
-          0,
-        totalLoans: loansResponse.pagination?.total || 0,
+        totalBooks: allBooksResponse.total || 0,
+        availableBooks: availableBooksResponse.total || 0,
+        totalLoans: loansResponse.total || 0,
         overdueLoans: overdueResponse.data?.length || 0,
         totalUsers: usersResponse.data?.length || 0,
         totalMembers: membersResponse.data?.length || 0,
         pendingBookings: bookingsResponse.data?.length || 0,
-        totalAnnouncements: announcementsResponse.pagination?.total || 0,
+        totalAnnouncements: announcementsResponse.data?.length || 0,
       });
 
       setRecentLoans(loansResponse.data || []);
