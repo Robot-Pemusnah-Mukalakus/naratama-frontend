@@ -75,8 +75,7 @@ export default function BookDetailPage() {
     }
 
     setBorrowing(true);
-    setPaymentRequired(false);
-    setPaymentDetails(null);
+
 
     try {
       const response = await bookLoansService.createLoan({
