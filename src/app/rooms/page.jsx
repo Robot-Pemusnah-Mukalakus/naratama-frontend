@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { roomsService } from "@/lib/api";
 import { useAuth } from "@/context/AuthContext";
+import { Script } from "next/script";
 import {
   Card,
   CardContent,
@@ -46,6 +47,7 @@ export default function RoomsPage() {
   // -- FILTER STATES --
   const [capacity, setCapacity] = useState(""); // "", "5", "10", "20", ">30"
   const [availability, setAvailability] = useState(""); // "", "available", "not_available"
+  const [snapLoaded, setSnapLoaded] = useState(false);
 
   useEffect(() => {
     fetchRooms();
@@ -69,6 +71,11 @@ export default function RoomsPage() {
   const handleBookRoom = (room) => {
     if (!isAuthenticated) {
       toast.error("Please login to book a room");
+      return;
+    }
+
+    if (!snapLoaded) {
+      toast.error("Payment system is still loading. Please try again later.");
       return;
     }
     setSelectedRoom(room);
@@ -177,12 +184,35 @@ export default function RoomsPage() {
 
       const response = await roomsService.createBooking(bookingData);
       if (response.success) {
-        // Check if membership was used for auto-confirmation
-        if (response.membershipApproved) {
-          toast.success("Room booking confirmed! (Active membership benefit)");
-        } else {
-          toast.success("Room booking request submitted successfully!");
-        }
+        // Payment ALAMAK BANYAKNYE PEKERJAAN AWAK
+        window.snap.pay(response.token, {
+          onSuccess: async function (result) {
+            // Notify backend to finalize booking after payment
+            const res = await roomsService.finishRoomPayment(
+              user.id,
+              result.order_id
+            );
+
+            if (res.success) {
+              toast.success("Payment successful! Membership activated.");
+              fetchUserDetails();
+            } else {
+              toast.error(
+                res.message || "Failed to activate membership after payment"
+              );
+            }
+          },
+          onPending: function (result) {
+            toast.info("Payment is pending. Please complete the payment.");
+          },
+          onError: function (result) {
+            console.error("Payment error:", result);
+            toast.error("Payment failed. Please try again.");
+          },
+          onClose: function () {
+            toast.info("Payment cancelled.");
+          },
+        });
         setBookingDialogOpen(false);
         setBookingForm({
           bookingDate: "",
@@ -240,6 +270,19 @@ export default function RoomsPage() {
   });
 
   return (
+    <>
+          <Script
+        src="https://app.sandbox.midtrans.com/snap/snap.js"
+        data-client-key={process.env.MIDTRANS_CLIENT_KEY || ""}
+        strategy="afterInteractive"
+        onLoad={() => {
+          setSnapLoaded(true);
+        }}
+        onError={(e) => {
+          console.error("Failed to load Midtrans Snap", e);
+          toast.error("Failed to load payment system");
+        }}
+      />
     <div className="container mx-auto px-4 py-8">
       <div className="mb-8">
         <h1 className="text-4xl font-bold mb-2">Study Rooms</h1>
@@ -593,5 +636,6 @@ export default function RoomsPage() {
         </DialogContent>
       </Dialog>
     </div>
+    </>
   );
 }
