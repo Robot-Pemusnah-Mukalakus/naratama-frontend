@@ -71,14 +71,14 @@ export default function AdminDashboard() {
       ]);
 
       setStats({
-        totalBooks: allBooksResponse.pagination?.total || 0,
-        availableBooks: availableBooksResponse.pagination?.total || 0,
-        totalLoans: loansResponse.pagination?.total || 0,
+        totalBooks: allBooksResponse.total || 0,
+        availableBooks: availableBooksResponse.total || 0,
+        totalLoans: loansResponse.total || 0,
         overdueLoans: overdueResponse.data?.length || 0,
-        totalUsers: usersResponse.pagination?.total || 0,
-        totalMembers: membersResponse.pagination?.total || 0,
-        pendingBookings: bookingsResponse.pagination?.total || 0,
-        totalAnnouncements: announcementsResponse.pagination?.total || 0,
+        totalUsers: usersResponse.data?.length || 0,
+        totalMembers: membersResponse.data?.length || 0,
+        pendingBookings: bookingsResponse.data?.length || 0,
+        totalAnnouncements: announcementsResponse.data?.length || 0,
       });
 
       setRecentLoans(loansResponse.data || []);
