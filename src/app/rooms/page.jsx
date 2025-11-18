@@ -186,7 +186,7 @@ export default function RoomsPage() {
       if (response.success) {
         // Payment ALAMAK BANYAKNYE PEKERJAAN AWAK
         const paymentResult = await new Promise((resolve, reject) => {
-          window.snap.pay(response.token, {
+          window.snap.pay(response.data.paymentToken, {
             onSuccess: function (result) {
               resolve({ status: 'success', result });
             },
