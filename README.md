@@ -6,6 +6,13 @@
 | ---------------------------------------------------------- | ------------------------------------------------------------------ |
 | [https://naratama.runsha.dev](https://naratama.runsha.dev) | [https://api.naratama.runsha.dev](https://api.naratama.runsha.dev) |
 
+## URI Video Presentasi
+
+### Video Presentasi & PPT
+
+- **PPT Presentasi:** [Google Drive](https://drive.google.com/file/d/1JBK-lit39zukPJOq41xPo8GDrukZvvzP/view?usp=sharing)
+- **Video Presentasi:** [YouTube](https://youtu.be/f5lq86k-MBk)
+
 ## Anggota Kelompok
 
 1. Harun (23/514148/TK/56466)
