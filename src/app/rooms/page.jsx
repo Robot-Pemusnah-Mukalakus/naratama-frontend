@@ -179,7 +179,7 @@ export default function RoomsPage() {
       };
 
       const response = await roomsService.createBooking(bookingData);
-      const paymentToken = response?.data?.data?.paymentToken;
+      const paymentToken = response?.data?.paymentToken;
       if (response.success && paymentToken) {
         // Payment required - trigger Midtrans payment
         const paymentResult = await new Promise((resolve, reject) => {
