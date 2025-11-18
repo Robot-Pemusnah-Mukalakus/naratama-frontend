@@ -166,5 +166,10 @@ export const paymentService = {
     apiClient.post("/api/payment/membership/finish", { userId, orderId }),
   createRoomPayment: (roomData) =>
     apiClient.post("/api/payment/room", roomData),
+  finishRoomPayment: (bookingId, orderId) =>
+    apiClient.post("/api/payment/room/finish", { bookingId, orderId }),
+  finishBookPayment: (loanId, orderId) =>
+    apiClient.post("/api/payment/book/finish", { loanId, orderId }),
 };
+
 export default apiClient;
