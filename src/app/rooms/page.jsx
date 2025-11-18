@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { roomsService, paymentService } from "@/lib/api";
 import { useAuth } from "@/context/AuthContext";
-import { Script } from "next/script";
+import Script from "next/script";
 import {
   Card,
   CardContent,
@@ -148,101 +148,105 @@ export default function RoomsPage() {
 
     return true;
   };
-const handleSubmitBooking = async (e) => {
-  e.preventDefault();
+  const handleSubmitBooking = async (e) => {
+    e.preventDefault();
 
-  // Validate before doing anything expensive
-  if (!validateBookingForm()) return;
+    // Validate before doing anything expensive
+    if (!validateBookingForm()) return;
 
-  try {
-    
-    const bookingDate = new Date(`${bookingForm.bookingDate}T00:00:00`).toISOString();
-    const startTime = new Date(`${bookingForm.bookingDate}T${bookingForm.startTime}:00`).toISOString();
-    const endTime = new Date(`${bookingForm.bookingDate}T${bookingForm.endTime}:00`).toISOString();
+    try {
+      const bookingDate = new Date(
+        `${bookingForm.bookingDate}T00:00:00`
+      ).toISOString();
+      const startTime = new Date(
+        `${bookingForm.bookingDate}T${bookingForm.startTime}:00`
+      ).toISOString();
+      const endTime = new Date(
+        `${bookingForm.bookingDate}T${bookingForm.endTime}:00`
+      ).toISOString();
 
-    const bookingData = {
-      userId: user.id,
-      roomId: selectedRoom.id,
-      bookingDate,
-      startTime,
-      endTime,
-      purpose: bookingForm.purpose,
-      specialRequests: bookingForm.specialRequests || undefined,
-    };
+      const bookingData = {
+        userId: user.id,
+        roomId: selectedRoom.id,
+        bookingDate,
+        startTime,
+        endTime,
+        purpose: bookingForm.purpose,
+        specialRequests: bookingForm.specialRequests || undefined,
+      };
 
-    const response = await roomsService.createBooking(bookingData);
-    const paymentToken = response?.data?.paymentToken;
+      const response = await roomsService.createBooking(bookingData);
+      const paymentToken = response?.data?.paymentToken;
 
-    // Payment flow
-    if (response.success && paymentToken) {
-      const paymentResult = await new Promise((resolve, reject) => {
-        console.log("Invoking payment with token:", paymentToken);
-        window.snap.pay(paymentToken, {
-          onSuccess: (result) => resolve({ status: "success", result }),
-          onPending: (result) => resolve({ status: "pending", result }),
-          onError: (result) => reject({ status: "error", result }),
-          onClose: () => resolve({ status: "closed" }),
+      // Payment flow
+      if (response.success && paymentToken) {
+        const paymentResult = await new Promise((resolve, reject) => {
+          console.log("Invoking payment with token:", paymentToken);
+          window.snap.pay(paymentToken, {
+            onSuccess: (result) => resolve({ status: "success", result }),
+            onPending: (result) => resolve({ status: "pending", result }),
+            onError: (result) => reject({ status: "error", result }),
+            onClose: () => resolve({ status: "closed" }),
+          });
         });
-      });
 
-      console.log("Whoops skipped over the payment womp womp");
-      console.log("Payment result:", paymentResult);
+        console.log("Whoops skipped over the payment womp womp");
+        console.log("Payment result:", paymentResult);
 
-      if (paymentResult.status === "success") {
-        const finishRes = await paymentService.finishRoomPayment(
-          user.id,
-          paymentResult.result.order_id
-        );
+        if (paymentResult.status === "success") {
+          const finishRes = await paymentService.finishRoomPayment(
+            user.id,
+            paymentResult.result.order_id
+          );
 
-        if (finishRes.success) {
-          console.log("womp womp im at finishRes.success:", finishRes);
-          toast.success("Payment successful! Your booking is confirmed.");
+          if (finishRes.success) {
+            console.log("womp womp im at finishRes.success:", finishRes);
+            toast.success("Payment successful! Your booking is confirmed.");
+            setBookingDialogOpen(false);
+            resetBookingForm();
+            fetchRooms();
+          } else {
+            toast.error(
+              finishRes.message ||
+                "Payment succeeded, but booking confirmation failed."
+            );
+          }
+        } else if (paymentResult.status === "pending") {
+          toast.info("Payment is pending. Please complete your transaction.");
           setBookingDialogOpen(false);
-          resetBookingForm();
-          fetchRooms();
-        } else {
-          toast.error(finishRes.message || "Payment succeeded, but booking confirmation failed.");
+        } else if (paymentResult.status === "closed") {
+          toast.info("The payment window was closed.");
         }
 
-      } else if (paymentResult.status === "pending") {
-        toast.info("Payment is pending. Please complete your transaction.");
-        setBookingDialogOpen(false);
-
-      } else if (paymentResult.status === "closed") {
-        toast.info("The payment window was closed.");
-
+        return;
       }
 
-      return; 
+      // NO PAYMENT REQUIRED
+      if (response.success) {
+        console.log("Booking confirmed without payment womp womp:", response);
+        toast.success("Booking confirmed. No payment required.");
+        setBookingDialogOpen(false);
+        resetBookingForm();
+        fetchRooms();
+      }
+    } catch (error) {
+      console.error("Booking creation error:", error);
+      toast.error(
+        error.message || "An error occurred while processing your booking."
+      );
     }
+  };
 
-    // NO PAYMENT REQUIRED
-    if (response.success) {
-      console.log("Booking confirmed without payment womp womp:", response);
-      toast.success("Booking confirmed. No payment required.");
-      setBookingDialogOpen(false);
-      resetBookingForm();
-      fetchRooms();
-    }
-
-  } catch (error) {
-    console.error("Booking creation error:", error);
-    toast.error(error.message || "An error occurred while processing your booking.");
+  // Utility to reset form
+  function resetBookingForm() {
+    setBookingForm({
+      bookingDate: "",
+      startTime: "",
+      endTime: "",
+      purpose: "",
+      specialRequests: "",
+    });
   }
-};
-
-
-// Utility to reset form
-function resetBookingForm() {
-  setBookingForm({
-    bookingDate: "",
-    startTime: "",
-    endTime: "",
-    purpose: "",
-    specialRequests: "",
-  });
-}
-
 
   const getRoomTypeLabel = (type) => {
     switch (type) {
