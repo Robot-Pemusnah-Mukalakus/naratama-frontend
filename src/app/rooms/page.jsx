@@ -177,6 +177,7 @@ export default function RoomsPage() {
 
       const response = await roomsService.createBooking(bookingData);
       const paymentToken = response?.data?.paymentToken;
+      const bookingId = response?.data?.bookingId;
 
       // Payment flow
       if (response.success && paymentToken) {
@@ -195,7 +196,7 @@ export default function RoomsPage() {
 
         if (paymentResult.status === "success") {
           const finishRes = await paymentService.finishRoomPayment(
-            user.id,
+            bookingId,
             paymentResult.result.order_id
           );
 
