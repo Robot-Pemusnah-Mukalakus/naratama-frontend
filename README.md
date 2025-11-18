@@ -1,4 +1,96 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Naratama Library
+
+## URI Deployment
+
+| Frontend                                                   | Backend                                                            |
+| ---------------------------------------------------------- | ------------------------------------------------------------------ |
+| [https://naratama.runsha.dev](https://naratama.runsha.dev) | [https://api.naratama.runsha.dev](https://api.naratama.runsha.dev) |
+
+## Anggota Kelompok
+
+1. Harun (23/514148/TK/56466)
+2. Raditya Ryan Narotama (23/518350/TK/57045)
+3. Dhafarel Hariyanto (23/522772/TK/57743)
+4. Lalu Kevin Proudy Handal (23/515833/TK/56745)
+5. Rafeyfa Asyla (23/512856/TK/56361)
+
+## Tentang Aplikasi
+
+Perpustakaan Naratama masih mengelola peminjaman buku dan ruangan secara manual sehingga pengecekan ketersediaan dan proses peminjaman dirasa tidak efisien.
+
+Oleh karena itu, untuk mengatasinya, aplikasi Manajemen Perpustakaan Naratama menyediakan:
+
+- Pengecekan ketersediaan buku dan ruangan secara real-time
+- Peminjaman secara online
+- Pengumuman buku baru
+- Pilihan commitment fee atau membership
+
+Dengan fitur-fitur tersebut, layanan perpustakaan menjadi lebih cepat, praktis, dan terorganisir.
+
+## Pembagian Kerja
+
+| PIC                      | Role                        | Jobdesc                                                                                                                             |
+| ------------------------ | --------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| Harun                    | Project Manager dan Backend | Merancang architecture design, mendelegasikan role dan jobdesc, menentukan techstack back-end, mengembangkan back-end, ngeprompt ai |
+| Dhafarel Hariyanto       | Front End                   | Mengerjakan backend dibagian routes users dan peminjaman buku. Seeding database. Membuat tampilan page announcement dan rooms.      |
+| Lalu Kevin Proudy Handal | Front End                   | Mengimplementasikan CRUD Books & Rooms di backend, sekaligus mengembangkan tampilan Homepage front-end dengan shadcn/ui             |
+| Rafeyfa Asyla            | Front End                   | Mengembangkan backend announcements serta mengimplementasikan frontend Books Management dan User Profile.                           |
+| Raditya Ryan Narotama    | Backend                     | Mengembangkan sistem auth dan payment gateway baik dari bagian backend maupun frontend.                                             |
+
+## Teknologi
+
+### Frontend
+
+- **Framework Utama**: Next.js
+- **Styling & UI Kit**: Tailwind CSS, shadcn/ui
+- **State Management & Utilities**: React Context API
+
+### Backend
+
+- **Framework Backend**: Express.js (Node.js)
+- **Basis Data**: PostgreSQL
+- **Autentikasi**: OAuth (Google Login)
+- **Integrasi Pihak Ketiga**: Payment Gateway (Midtrans)
+
+## Fitur Utama
+
+### User Features
+
+- Homepage dengan katalog buku
+- Login & Register (termasuk Login via Google OAuth)
+- Book Catalog & Book Detail
+- Book Loans (Peminjaman Buku)
+- Room Booking
+- Announcements (Pengumuman)
+- Membership
+- Dashboard & Profile
+
+### Admin Features
+
+- Admin Dashboard
+- Books Management
+- Book Loans Management
+- Room Bookings Management
+- Announcements Management
+- Users Management
+
+## User Experience Highlights
+
+1. **Efisien dalam Sistem Peminjaman Buku dan Booking Room**
+
+   - Pengguna dapat meminjam buku atau booking ruangan hanya dalam 4 kali klik/tahap
+
+2. **Akses Informasi Aktual**
+
+   - Informasi real-time tentang ketersediaan buku dan ruangan
+
+3. **Menghindari Gulf of Evaluation**
+   - Toast notifications menggunakan Sonner untuk feedback yang jelas
+
+## Penilaian Tambahan
+
+- ✅ Mengimplementasikan Payment Gateway (Midtrans)
+- ✅ Mengimplementasikan Login via Google (OAuth)
 
 ## Getting Started
 
@@ -10,27 +102,6 @@ npm run dev
 yarn dev
 # or
 pnpm dev
-# or
-bun dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
