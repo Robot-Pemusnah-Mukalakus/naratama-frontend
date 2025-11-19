@@ -35,12 +35,12 @@ const nextConfig = {
               connect-src 'self' https://app.sandbox.midtrans.com https://api.naratama.runsha.dev;
               img-src 'self' data: https:;
               style-src 'self' 'unsafe-inline';
-            `.replace(/\s+/g, " ")
-          }
-        ]
-      }
+            `.replace(/\s+/g, " "),
+          },
+        ],
+      },
     ];
-  }
+  },
 };
 
 export default nextConfig;
