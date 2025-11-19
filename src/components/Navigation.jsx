@@ -74,7 +74,7 @@ export default function Navigation() {
               <span className="sm:hidden">Naratama</span>
             </Link>
 
-            <div className="hidden md:flex items-center gap-1">
+            <div className="hidden lg:flex items-center gap-1">
               {navLinks.map((link) => {
                 const Icon = link.icon;
                 const isActive = pathname === link.href;
@@ -96,11 +96,11 @@ export default function Navigation() {
           <div className="flex items-center gap-4">
             {isAuthenticated ? (
               <>
-                <Link href="/dashboard" className="hidden sm:block">
+                <Link href="/dashboard" className="hidden lg:block">
                   <Button variant="outline">Dashboard</Button>
                 </Link>
                 {isStaff && (
-                  <Link href="/admin" className="hidden lg:block">
+                  <Link href="/admin" className="hidden xl:block">
                     <Button variant="outline">Admin Dashboard</Button>
                   </Link>
                 )}
@@ -144,7 +144,7 @@ export default function Navigation() {
                 </DropdownMenu>
               </>
             ) : (
-              <div className="hidden sm:flex items-center gap-2">
+              <div className="hidden lg:flex items-center gap-2">
                 <Link href="/auth/login">
                   <Button
                     variant="outline"
@@ -164,7 +164,7 @@ export default function Navigation() {
             {/* Mobile Menu */}
             <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
               <SheetTrigger asChild>
-                <Button variant="ghost" size="icon" className="md:hidden">
+                <Button variant="ghost" size="icon" className="lg:hidden">
                   <Menu className="h-6 w-6" />
                   <span className="sr-only">Toggle menu</span>
                 </Button>

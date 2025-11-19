@@ -51,9 +51,16 @@ export default function RegisterPage() {
       const { confirmPassword, ...registerData } = formData;
       const result = await register(registerData);
       console.log("result", result);
+
       if (result.success) {
-        toast.success("Registration successful! Welcome to Naratama Library");
-        router.push("/dashboard");
+        toast.success(
+          result.message ||
+            "Registration successful! Please check your email for OTP."
+        );
+        // Redirect to OTP verification page with email
+        router.push(
+          `/auth/verify-otp?email=${encodeURIComponent(formData.email)}`
+        );
       } else if (
         result &&
         result.errors &&

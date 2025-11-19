@@ -51,20 +51,25 @@ export function AuthProvider({ children }) {
   const register = async (userData) => {
     try {
       const response = await authService.register(userData);
-      if (response.success && response.user) {
-        setUser(response.user);
-        return { success: true };
+      // Registration now returns success without user (needs OTP verification)
+      if (response.success) {
+        return {
+          success: true,
+          message:
+            response.message ||
+            "Registration successful. Please check your email for OTP.",
+        };
       }
       if (response.errors) {
         return {
-          success: "false",
+          success: false,
           message: response.message || "Registration failed",
           errors: response.errors,
         };
       }
       return {
-        success: "false",
-        message: response || "Registration failed",
+        success: false,
+        message: response.message || "Registration failed",
         errors: response.errors || [],
       };
     } catch (error) {
@@ -73,6 +78,28 @@ export function AuthProvider({ children }) {
         success: false,
         message: error.message,
         errors: error.errors || [],
+      };
+    }
+  };
+
+  const verifyOTP = async (otpData) => {
+    try {
+      const response = await authService.verifyOTP(otpData);
+      if (response.success && response.user) {
+        setUser(response.user);
+        return {
+          success: true,
+          message: response.message || "Email verified successfully!",
+        };
+      }
+      return {
+        success: false,
+        message: response.message || "OTP verification failed",
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.message || "OTP verification failed",
       };
     }
   };
@@ -106,6 +133,7 @@ export function AuthProvider({ children }) {
         isStaff,
         login,
         register,
+        verifyOTP,
         logout,
         googleLogin,
         checkAuth,
