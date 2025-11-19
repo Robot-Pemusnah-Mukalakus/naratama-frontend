@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
@@ -20,7 +20,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Mail, CheckCircle, ArrowLeft, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 
-export default function VerifyOTPPage() {
+function VerifyOTPContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { verifyOTP } = useAuth();
@@ -314,5 +314,34 @@ export default function VerifyOTPPage() {
         </form>
       </Card>
     </div>
+  );
+}
+
+export default function VerifyOTPPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="container mx-auto px-4 py-16 flex items-center justify-center min-h-[calc(100vh-200px)]">
+          <Card className="w-full max-w-md">
+            <CardHeader className="text-center">
+              <div className="flex justify-center mb-4">
+                <div className="rounded-full bg-primary/10 p-3">
+                  <Mail className="h-8 w-8 text-primary animate-pulse" />
+                </div>
+              </div>
+              <CardTitle>Loading...</CardTitle>
+              <CardDescription>Please wait</CardDescription>
+            </CardHeader>
+            <CardContent className="py-12">
+              <div className="flex justify-center">
+                <RefreshCw className="h-8 w-8 animate-spin text-muted-foreground" />
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      }
+    >
+      <VerifyOTPContent />
+    </Suspense>
   );
 }
