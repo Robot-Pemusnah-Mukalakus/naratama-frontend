@@ -30,17 +30,32 @@ const nextConfig = {
             key: "Content-Security-Policy",
             value: `
               default-src 'self';
-              script-src 'self' 'unsafe-eval' 'unsafe-inline' https://app.sandbox.midtrans.com https://snap-assets.al-pc-id-b.cdn.gtflabs.io;
+              script-src 'self' 'unsafe-eval' 'unsafe-inline' 
+                https://app.sandbox.midtrans.com 
+                https://snap-assets.al-pc-id-b.cdn.gtflabs.io 
+                https://api.sandbox.midtrans.com 
+                https://pay.google.com 
+                https://js-agent.newrelic.com 
+                https://bam.nr-data.net 
+                https://gwk.gopayapi.com/sdk/stable/gp-container.min.js;
+              script-src-elem 'self' 'unsafe-inline' 
+                https://app.sandbox.midtrans.com 
+                https://snap-assets.al-pc-id-b.cdn.gtflabs.io 
+                https://api.sandbox.midtrans.com 
+                https://pay.google.com 
+                https://js-agent.newrelic.com 
+                https://bam.nr-data.net 
+                https://gwk.gopayapi.com;
               frame-src https://app.sandbox.midtrans.com https://app.midtrans.com;
               connect-src 'self' https://app.sandbox.midtrans.com https://api.naratama.runsha.dev;
               img-src 'self' data: https:;
               style-src 'self' 'unsafe-inline';
-            `.replace(/\s+/g, " ")
-          }
-        ]
-      }
+            `.replace(/\s+/g, " "),
+          },
+        ],
+      },
     ];
-  }
+  },
 };
 
 export default nextConfig;
