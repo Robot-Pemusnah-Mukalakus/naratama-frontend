@@ -93,18 +93,18 @@ export default function AdminDashboard() {
   const StatCard = ({ title, value, icon: Icon, description, href }) => (
     <Link href={href}>
       <Card className="hover:bg-accent transition-colors cursor-pointer">
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">{title}</CardTitle>
-          <Icon className="h-4 w-4 text-muted-foreground" />
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-4 md:p-6">
+          <CardTitle className="text-xs md:text-sm font-medium">{title}</CardTitle>
+          <Icon className="h-3 w-3 md:h-4 md:w-4 text-muted-foreground" />
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-4 md:p-6 pt-0">
           {loading ? (
-            <Skeleton className="h-8 w-20" />
+            <Skeleton className="h-6 md:h-8 w-16 md:w-20" />
           ) : (
             <>
-              <div className="text-2xl font-bold">{value}</div>
+              <div className="text-xl md:text-2xl font-bold">{value}</div>
               {description && (
-                <p className="text-xs text-muted-foreground">{description}</p>
+                <p className="text-xs text-muted-foreground mt-1">{description}</p>
               )}
             </>
           )}
@@ -119,16 +119,16 @@ export default function AdminDashboard() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 md:space-y-6 p-4 md:p-6">
       <div>
-        <h1 className="text-3xl font-bold">Dashboard</h1>
-        <p className="text-muted-foreground">
+        <h1 className="text-2xl md:text-3xl font-bold">Dashboard</h1>
+        <p className="text-sm md:text-base text-muted-foreground">
           Overview of library management system
         </p>
       </div>
 
       {/* Stats Grid */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-3 md:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard
           title="Total Books"
           value={stats.totalBooks}
@@ -160,35 +160,35 @@ export default function AdminDashboard() {
       </div>
 
       {/* Quick Actions */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-3 md:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
         <Link href="/admin/books">
-          <Button variant="outline" className="w-full h-full">
+          <Button variant="outline" className="w-full h-full py-3">
             <BookOpen className="h-4 w-4 mr-2" />
-            Manage Books
+            <span className="text-sm md:text-base">Manage Books</span>
           </Button>
         </Link>
         <Link href="/admin/loans">
-          <Button variant="outline" className="w-full h-full">
+          <Button variant="outline" className="w-full h-full py-3">
             <LibraryBig className="h-4 w-4 mr-2" />
-            Manage Loans
+            <span className="text-sm md:text-base">Manage Loans</span>
           </Button>
         </Link>
         <Link href="/admin/rooms">
-          <Button variant="outline" className="w-full h-full">
+          <Button variant="outline" className="w-full h-full py-3">
             <DoorOpen className="h-4 w-4 mr-2" />
-            Manage Rooms
+            <span className="text-sm md:text-base">Manage Rooms</span>
           </Button>
         </Link>
         <Link href="/admin/announcements">
-          <Button variant="outline" className="w-full h-full">
+          <Button variant="outline" className="w-full h-full py-3">
             <Megaphone className="h-4 w-4 mr-2" />
-            Announcements
+            <span className="text-sm md:text-base">Announcements</span>
           </Button>
         </Link>
       </div>
 
       {/* Recent Activity */}
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
         {/* Recent Loans */}
         <Card>
           <CardHeader>
@@ -207,21 +207,21 @@ export default function AdminDashboard() {
                 No recent loans
               </p>
             ) : (
-              <div className="space-y-4">
+              <div className="space-y-3">
                 {recentLoans.map((loan) => (
                   <div
                     key={loan.id}
-                    className="flex items-start justify-between border-b pb-2 last:border-0"
+                    className="flex flex-col sm:flex-row sm:items-start sm:justify-between border-b pb-3 last:border-0 gap-1 sm:gap-0"
                   >
                     <div className="flex-1">
-                      <p className="text-sm font-medium">
+                      <p className="text-sm font-medium line-clamp-1">
                         {loan.book?.title || "N/A"}
                       </p>
                       <p className="text-xs text-muted-foreground">
                         {loan.user?.name || "N/A"}
                       </p>
                     </div>
-                    <div className="text-xs text-muted-foreground">
+                    <div className="text-xs text-muted-foreground whitespace-nowrap">
                       Due: {formatDate(loan.dueDate)}
                     </div>
                   </div>
@@ -252,21 +252,21 @@ export default function AdminDashboard() {
                 No overdue loans
               </p>
             ) : (
-              <div className="space-y-4">
+              <div className="space-y-3">
                 {overdueLoans.map((loan) => (
                   <div
                     key={loan.id}
-                    className="flex items-start justify-between border-b pb-2 last:border-0"
+                    className="flex flex-col sm:flex-row sm:items-start sm:justify-between border-b pb-3 last:border-0 gap-1 sm:gap-0"
                   >
                     <div className="flex-1">
-                      <p className="text-sm font-medium">
+                      <p className="text-sm font-medium line-clamp-1">
                         {loan.book?.title || "N/A"}
                       </p>
                       <p className="text-xs text-muted-foreground">
                         {loan.user?.name || "N/A"}
                       </p>
                     </div>
-                    <div className="text-xs text-destructive font-medium">
+                    <div className="text-xs text-destructive font-medium whitespace-nowrap">
                       {loan.daysOverdue} days overdue
                     </div>
                   </div>
@@ -284,7 +284,7 @@ export default function AdminDashboard() {
           <CardDescription>Overall library metrics</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid gap-4 md:grid-cols-3">
+          <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3">
             <div className="space-y-2">
               <p className="text-sm font-medium text-muted-foreground">
                 Books Overview

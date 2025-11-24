@@ -191,50 +191,52 @@ export default function AdminBooksPage() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
+    <div className="space-y-4 md:space-y-6 p-4 md:p-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold">Books Management</h1>
-          <p className="text-muted-foreground">
-            Manage your library&apos;s book collection
+          <h1 className="text-2xl md:text-3xl font-bold">Books Management</h1>
+          <p className="text-sm text-muted-foreground">
+            Manage library book inventory
           </p>
         </div>
-        <Button onClick={() => handleOpenDialog()}>
+        <Button onClick={() => handleOpenDialog()} className="w-full sm:w-auto">
           <Plus className="h-4 w-4 mr-2" />
-          Add Book
+          <span className="sm:inline">Add Book</span>
         </Button>
       </div>
 
       <Card>
-        <CardHeader>
-          <CardTitle>Search Books</CardTitle>
+        <CardHeader className="p-4 md:p-6">
+          <CardTitle className="text-lg md:text-xl">Search Books</CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="flex gap-2">
+        <CardContent className="p-4 md:p-6">
+          <div className="flex flex-col sm:flex-row gap-2">
             <Input
               placeholder="Search by title, author, or ISBN..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+              className="w-full"
             />
-            <Button onClick={handleSearch}>
+            <Button onClick={handleSearch} className="w-full sm:w-auto">
               <Search className="h-4 w-4 mr-2" />
-              Search
+              <span>Search</span>
             </Button>
           </div>
         </CardContent>
       </Card>
 
       <Card>
-        <CardHeader>
-          <CardTitle>Books</CardTitle>
-          <CardDescription>Total: {books.length} books</CardDescription>
+        <CardHeader className="p-4 md:p-6">
+          <CardTitle className="text-lg md:text-xl">Books</CardTitle>
+          <CardDescription className="text-sm">Total: {books.length} books</CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-0 md:p-6">
           {loading ? (
             <div className="text-center py-8">Loading...</div>
           ) : (
             <>
+              <div className="overflow-x-auto">
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -292,9 +294,10 @@ export default function AdminBooksPage() {
                   ))}
                 </TableBody>
               </Table>
+              </div>
 
               {totalPages > 1 && (
-                <div className="mt-4 flex justify-center gap-2">
+                <div className="mt-4 flex flex-wrap justify-center gap-2 px-4 md:px-0">
                   <Button
                     variant="outline"
                     disabled={page === 1}
