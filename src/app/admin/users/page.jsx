@@ -149,31 +149,32 @@ export default function AdminUsersPage() {
       });
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 md:space-y-6 p-4 md:p-6">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold">Users Management</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-2xl md:text-3xl font-bold">Users Management</h1>
+          <p className="text-sm text-muted-foreground">
             Manage library users and memberships
           </p>
         </div>
       </div>
 
       <Card>
-        <CardHeader>
-          <CardTitle>Search Users</CardTitle>
+        <CardHeader className="p-4 md:p-6">
+          <CardTitle className="text-lg md:text-xl">Search Users</CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="flex gap-2">
+        <CardContent className="p-4 md:p-6">
+          <div className="flex flex-col sm:flex-row gap-2">
             <Input
               placeholder="Search by email..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+              className="w-full"
             />
-            <Button onClick={handleSearch}>
+            <Button onClick={handleSearch} className="w-full sm:w-auto">
               <Search className="h-4 w-4 mr-2" />
-              Search
+              <span>Search</span>
             </Button>
             {searchTerm && (
               <Button
@@ -182,6 +183,7 @@ export default function AdminUsersPage() {
                   setSearchTerm("");
                   fetchUsers();
                 }}
+                className="w-full sm:w-auto"
               >
                 Clear
               </Button>
@@ -191,15 +193,16 @@ export default function AdminUsersPage() {
       </Card>
 
       <Tabs defaultValue="all" className="space-y-4">
-        <TabsList>
+        <TabsList className="w-full grid grid-cols-3 h-auto">
           <TabsTrigger
             value="all"
             onClick={() => {
               setFilter("all");
               setSearchTerm("");
             }}
+            className="text-xs sm:text-sm"
           >
-            All Users
+            All
           </TabsTrigger>
           <TabsTrigger
             value="members"
@@ -207,6 +210,7 @@ export default function AdminUsersPage() {
               setFilter("members");
               setSearchTerm("");
             }}
+            className="text-xs sm:text-sm"
           >
             Members
           </TabsTrigger>
@@ -216,6 +220,7 @@ export default function AdminUsersPage() {
               setFilter("active");
               setSearchTerm("");
             }}
+            className="text-xs sm:text-sm"
           >
             Active
           </TabsTrigger>
@@ -223,16 +228,17 @@ export default function AdminUsersPage() {
 
         <TabsContent value="all" className="space-y-4">
           <Card>
-            <CardHeader>
-              <CardTitle>All Users</CardTitle>
-              <CardDescription>
+            <CardHeader className="p-4 md:p-6">
+              <CardTitle className="text-lg md:text-xl">All Users</CardTitle>
+              <CardDescription className="text-sm">
                 Total: {filteredUsers.length} users
               </CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="p-0 md:p-6">
               {loading ? (
                 <div className="text-center py-8">Loading...</div>
               ) : (
+                <div className="overflow-x-auto">
                 <Table>
                   <TableHeader>
                     <TableRow>
@@ -308,6 +314,7 @@ export default function AdminUsersPage() {
                     ))}
                   </TableBody>
                 </Table>
+                </div>
               )}
             </CardContent>
           </Card>

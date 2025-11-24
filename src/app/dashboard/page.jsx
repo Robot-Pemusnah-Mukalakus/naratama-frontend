@@ -124,27 +124,27 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="mb-8">
-        <h1 className="text-4xl font-bold mb-2">Dashboard</h1>
-        <p className="text-muted-foreground">Welcome back, {user.name}!</p>
+    <div className="container mx-auto px-4 py-6 md:py-8">
+      <div className="mb-6 md:mb-8">
+        <h1 className="text-2xl md:text-4xl font-bold mb-2">Dashboard</h1>
+        <p className="text-sm md:text-base text-muted-foreground">Welcome back, {user.name}!</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 mb-6 md:mb-8">
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Profile</CardTitle>
-            <User className="h-4 w-4 text-muted-foreground" />
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-4 md:p-6">
+            <CardTitle className="text-xs md:text-sm font-medium">Profile</CardTitle>
+            <User className="h-3 w-3 md:h-4 md:w-4 text-muted-foreground" />
           </CardHeader>
-          <CardContent>
-            <div className="flex items-center gap-4">
-              <Avatar className="h-12 w-12">
-                <AvatarFallback>{getInitials(user.name)}</AvatarFallback>
+          <CardContent className="p-4 md:p-6 pt-0">
+            <div className="flex items-center gap-3 md:gap-4">
+              <Avatar className="h-10 w-10 md:h-12 md:w-12">
+                <AvatarFallback className="text-sm md:text-base">{getInitials(user.name)}</AvatarFallback>
               </Avatar>
-              <div>
-                <p className="font-semibold">{user.name}</p>
-                <p className="text-sm text-muted-foreground">{user.email}</p>
-                <Badge variant="outline" className="mt-1">
+              <div className="min-w-0 flex-1">
+                <p className="font-semibold text-sm md:text-base truncate">{user.name}</p>
+                <p className="text-xs md:text-sm text-muted-foreground truncate">{user.email}</p>
+                <Badge variant="outline" className="mt-1 text-xs">
                   {user.role}
                 </Badge>
               </div>
@@ -153,12 +153,12 @@ export default function DashboardPage() {
         </Card>
 
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Active Loans</CardTitle>
-            <BookOpen className="h-4 w-4 text-muted-foreground" />
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-4 md:p-6">
+            <CardTitle className="text-xs md:text-sm font-medium">Active Loans</CardTitle>
+            <BookOpen className="h-3 w-3 md:h-4 md:w-4 text-muted-foreground" />
           </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold">
+          <CardContent className="p-4 md:p-6 pt-0">
+            <div className="text-2xl md:text-3xl font-bold">
               {loans.filter((l) => l.status === "ACTIVE").length}
             </div>
             <p className="text-xs text-muted-foreground mt-1">
@@ -168,12 +168,12 @@ export default function DashboardPage() {
         </Card>
 
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Room Bookings</CardTitle>
-            <DoorOpen className="h-4 w-4 text-muted-foreground" />
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-4 md:p-6">
+            <CardTitle className="text-xs md:text-sm font-medium">Room Bookings</CardTitle>
+            <DoorOpen className="h-3 w-3 md:h-4 md:w-4 text-muted-foreground" />
           </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold">
+          <CardContent className="p-4 md:p-6 pt-0">
+            <div className="text-2xl md:text-3xl font-bold">
               {
                 bookings.filter(
                   (b) => b.status === "CONFIRMED" || b.status === "PENDING"
@@ -188,9 +188,9 @@ export default function DashboardPage() {
       </div>
 
       <Tabs defaultValue="loans" className="space-y-4">
-        <TabsList className="w-150 mx-auto">
-          <TabsTrigger value="loans">My Loans</TabsTrigger>
-          <TabsTrigger value="bookings">My Bookings</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-2 max-w-md mx-auto">
+          <TabsTrigger value="loans" className="text-sm md:text-base">My Loans</TabsTrigger>
+          <TabsTrigger value="bookings" className="text-sm md:text-base">My Bookings</TabsTrigger>
         </TabsList>
 
         <TabsContent value="loans" className="space-y-4">
@@ -223,21 +223,21 @@ export default function DashboardPage() {
           ) : (
             loans.map((loan) => (
               <Card key={loan.id}>
-                <CardHeader>
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <CardTitle>
+                <CardHeader className="p-4 md:p-6">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex-1 min-w-0">
+                      <CardTitle className="text-base md:text-lg truncate">
                         {loan.book?.title || "Unknown Book"}
                       </CardTitle>
-                      <CardDescription>{loan.book?.author}</CardDescription>
+                      <CardDescription className="text-xs md:text-sm truncate">{loan.book?.author}</CardDescription>
                     </div>
-                    <Badge variant={getLoanStatusColor(loan.status)}>
+                    <Badge variant={getLoanStatusColor(loan.status)} className="text-xs shrink-0">
                       {loan.status}
                     </Badge>
                   </div>
                 </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-2 gap-4 text-sm">
+                <CardContent className="p-4 md:p-6 pt-0">
+                  <div className="grid grid-cols-2 gap-3 md:gap-4 text-xs md:text-sm">
                     <div>
                       <p className="text-muted-foreground">Loan Date</p>
                       <p className="font-medium">{formatDate(loan.loanDate)}</p>
@@ -308,19 +308,19 @@ export default function DashboardPage() {
           ) : (
             bookings.map((booking) => (
               <Card key={booking.id}>
-                <CardHeader>
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <CardTitle>{booking.room?.name || "Room"}</CardTitle>
-                      <CardDescription>{booking.purpose}</CardDescription>
+                <CardHeader className="p-4 md:p-6">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex-1 min-w-0">
+                      <CardTitle className="text-base md:text-lg truncate">{booking.room?.name || "Room"}</CardTitle>
+                      <CardDescription className="text-xs md:text-sm truncate">{booking.purpose}</CardDescription>
                     </div>
-                    <Badge variant={getBookingStatusColor(booking.status)}>
+                    <Badge variant={getBookingStatusColor(booking.status)} className="text-xs shrink-0">
                       {booking.status}
                     </Badge>
                   </div>
                 </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-2 gap-4 text-sm">
+                <CardContent className="p-4 md:p-6 pt-0">
+                  <div className="grid grid-cols-2 gap-3 md:gap-4 text-xs md:text-sm">
                     <div>
                       <p className="text-muted-foreground">Date</p>
                       <p className="font-medium">

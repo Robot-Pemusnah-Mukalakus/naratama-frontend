@@ -182,11 +182,12 @@ export default function AdminRoomsPage() {
               <CardTitle>All Bookings</CardTitle>
               <CardDescription>Complete list of room bookings</CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="p-0 md:p-6">
               {loading ? (
                 <div className="text-center py-8">Loading...</div>
               ) : (
                 <>
+                  <div className="overflow-x-auto">
                   <Table>
                     <TableHeader>
                       <TableRow>
@@ -228,7 +229,7 @@ export default function AdminRoomsPage() {
                             {getStatusBadge(booking.status)}
                           </TableCell>
                           <TableCell>
-                            <div className="flex gap-2">
+                            <div className="flex flex-col sm:flex-row gap-1 sm:gap-2">
                               {booking.status === "PENDING" && (
                                 <>
                                   <Button
@@ -240,9 +241,11 @@ export default function AdminRoomsPage() {
                                         "CONFIRMED"
                                       )
                                     }
+                                    className="w-full sm:w-auto text-xs"
                                   >
                                     <CheckCircle className="h-3 w-3 mr-1" />
-                                    Approve
+                                    <span className="hidden sm:inline">Approve</span>
+                                    <span className="sm:hidden">✓</span>
                                   </Button>
                                   <Button
                                     size="sm"
@@ -253,9 +256,11 @@ export default function AdminRoomsPage() {
                                         "CANCELLED"
                                       )
                                     }
+                                    className="w-full sm:w-auto text-xs"
                                   >
                                     <XCircle className="h-3 w-3 mr-1" />
-                                    Reject
+                                    <span className="hidden sm:inline">Reject</span>
+                                    <span className="sm:hidden">✗</span>
                                   </Button>
                                 </>
                               )}
@@ -270,9 +275,11 @@ export default function AdminRoomsPage() {
                                         "COMPLETED"
                                       )
                                     }
+                                    className="w-full sm:w-auto text-xs"
                                   >
                                     <Clock className="h-3 w-3 mr-1" />
-                                    Complete
+                                    <span className="hidden sm:inline">Complete</span>
+                                    <span className="sm:hidden">✓</span>
                                   </Button>
                                   <Button
                                     size="sm"
@@ -280,9 +287,11 @@ export default function AdminRoomsPage() {
                                     onClick={() =>
                                       handleCancelBooking(booking.id)
                                     }
+                                    className="w-full sm:w-auto text-xs"
                                   >
                                     <XCircle className="h-3 w-3 mr-1" />
-                                    Cancel
+                                    <span className="hidden sm:inline">Cancel</span>
+                                    <span className="sm:hidden">✗</span>
                                   </Button>
                                 </>
                               )}
@@ -292,9 +301,10 @@ export default function AdminRoomsPage() {
                       ))}
                     </TableBody>
                   </Table>
+                  </div>
 
                   {totalPages > 1 && (
-                    <div className="mt-4 flex justify-center gap-2">
+                    <div className="mt-4 flex flex-wrap justify-center gap-2 px-4 md:px-0">
                       <Button
                         variant="outline"
                         disabled={page === 1}

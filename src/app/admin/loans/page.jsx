@@ -202,28 +202,29 @@ export default function AdminLoansPage() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
+    <div className="space-y-4 md:space-y-6 p-4 md:p-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold">Book Loans Management</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-2xl md:text-3xl font-bold">Book Loans Management</h1>
+          <p className="text-sm text-muted-foreground">
             Manage book borrowing and returns
           </p>
         </div>
-        <Button onClick={() => setDialogOpen(true)}>
+        <Button onClick={() => setDialogOpen(true)} className="w-full sm:w-auto">
           <Plus className="h-4 w-4 mr-2" />
-          Create Loan
+          <span>Create Loan</span>
         </Button>
       </div>
 
       <Tabs defaultValue="all" className="space-y-4">
-        <TabsList>
+        <TabsList className="w-full grid grid-cols-3 h-auto">
           <TabsTrigger
             value="all"
             onClick={() => {
               setStatusFilter("all");
               setPage(1);
             }}
+            className="text-xs sm:text-sm"
           >
             All Loans
           </TabsTrigger>
@@ -233,6 +234,7 @@ export default function AdminLoansPage() {
               setStatusFilter("OVERDUE");
               setPage(1);
             }}
+            className="text-xs sm:text-sm"
           >
             Overdue ({overdueLoans.length})
           </TabsTrigger>
@@ -242,6 +244,7 @@ export default function AdminLoansPage() {
               setStatusFilter("ACTIVE");
               setPage(1);
             }}
+            className="text-xs sm:text-sm"
           >
             Active
           </TabsTrigger>
@@ -249,15 +252,16 @@ export default function AdminLoansPage() {
 
         <TabsContent value="all" className="space-y-4">
           <Card>
-            <CardHeader>
-              <CardTitle>All Loans</CardTitle>
-              <CardDescription>Complete list of all book loans</CardDescription>
+            <CardHeader className="p-4 md:p-6">
+              <CardTitle className="text-lg md:text-xl">All Loans</CardTitle>
+              <CardDescription className="text-sm">Complete list of all book loans</CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="p-0 md:p-6">
               {loading ? (
                 <div className="text-center py-8">Loading...</div>
               ) : (
                 <>
+                  <div className="overflow-x-auto">
                   <Table>
                     <TableHeader>
                       <TableRow>
@@ -296,7 +300,7 @@ export default function AdminLoansPage() {
                             {loan.fineAmount > 0 ? `$${loan.fineAmount}` : "-"}
                           </TableCell>
                           <TableCell>
-                            <div className="flex gap-2">
+                            <div className="flex flex-col sm:flex-row gap-1 sm:gap-2">
                               {loan.status === "ACTIVE" && (
                                 <>
                                   <Button
@@ -333,9 +337,10 @@ export default function AdminLoansPage() {
                       ))}
                     </TableBody>
                   </Table>
+                  </div>
 
                   {totalPages > 1 && (
-                    <div className="mt-4 flex justify-center gap-2">
+                    <div className="mt-4 flex flex-wrap justify-center gap-2 px-4 md:px-0">
                       <Button
                         variant="outline"
                         disabled={page === 1}
