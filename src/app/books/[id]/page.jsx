@@ -31,6 +31,7 @@ import {
   Globe,
   FileText,
   Hash,
+  Loader2,
 } from "lucide-react";
 import { toast } from "sonner";
 import Link from "next/link";
@@ -75,7 +76,6 @@ export default function BookDetailPage() {
     }
 
     setBorrowing(true);
-
 
     try {
       const response = await bookLoansService.createLoan({
@@ -392,12 +392,19 @@ export default function BookDetailPage() {
                     {isAuthenticated ? (
                       <Button
                         className="w-full"
-                        disabled={book.availableQuantity === 0}
+                        disabled={book.availableQuantity === 0 || borrowing}
                         onClick={() => setBorrowDialogOpen(true)}
                       >
-                        {book.availableQuantity > 0
-                          ? "Request to Borrow"
-                          : "Currently Unavailable"}
+                        {borrowing ? (
+                          <>
+                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                            Processing Payment...
+                          </>
+                        ) : book.availableQuantity > 0 ? (
+                          "Request to Borrow"
+                        ) : (
+                          "Currently Unavailable"
+                        )}
                       </Button>
                     ) : (
                       <div className="space-y-2">
