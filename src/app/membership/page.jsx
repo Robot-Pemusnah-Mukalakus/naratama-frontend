@@ -21,6 +21,7 @@ import {
   Calendar,
   AlertCircle,
   Sparkles,
+  Loader2,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
@@ -32,6 +33,7 @@ export default function MembershipPage() {
   const [userDetails, setUserDetails] = useState(null);
   const [loading, setLoading] = useState(true);
   const [snapLoaded, setSnapLoaded] = useState(false);
+  const [paymentInProgress, setPaymentInProgress] = useState(false);
 
   useEffect(() => {
     if (!authLoading && isAuthenticated && user) {
@@ -147,6 +149,8 @@ export default function MembershipPage() {
       return;
     }
 
+    setPaymentInProgress(true);
+
     try {
       // Pass the current user's ID to the payment service
       const response = await paymentService.createMembershipPayment(user.id);
@@ -187,7 +191,7 @@ export default function MembershipPage() {
       console.error("Payment error:", error);
       toast.error(error.message || "Failed to process payment");
     } finally {
-      setLoading(false);
+      setPaymentInProgress(false);
     }
   };
 
@@ -299,9 +303,16 @@ export default function MembershipPage() {
               <Button
                 variant="outline"
                 onClick={() => handleJoinMembership("PREMIUM")}
-                disabled={loading}
+                disabled={paymentInProgress}
               >
-                {loading ? "Processing..." : "Upgrade Plan"}
+                {paymentInProgress ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Processing Payment...
+                  </>
+                ) : (
+                  "Upgrade Plan"
+                )}
               </Button>
             </CardFooter>
           </Card>
@@ -369,15 +380,20 @@ export default function MembershipPage() {
                         tier.name.split(" ")[0].toUpperCase()
                       )
                     }
-                    disabled={isCurrentTier || loading}
+                    disabled={isCurrentTier || paymentInProgress}
                   >
-                    {isCurrentTier
-                      ? "Current Plan"
-                      : loading
-                      ? "Processing..."
-                      : isAuthenticated
-                      ? "Select Plan"
-                      : "Get Started"}
+                    {isCurrentTier ? (
+                      "Current Plan"
+                    ) : paymentInProgress ? (
+                      <>
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        Processing Payment...
+                      </>
+                    ) : isAuthenticated ? (
+                      "Select Plan"
+                    ) : (
+                      "Get Started"
+                    )}
                   </Button>
                 </CardFooter>
               </Card>
