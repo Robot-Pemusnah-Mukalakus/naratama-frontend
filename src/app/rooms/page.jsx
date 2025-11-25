@@ -25,7 +25,14 @@ import {
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { DoorOpen, Users, Clock, CheckCircle, XCircle } from "lucide-react";
+import {
+  DoorOpen,
+  Users,
+  Clock,
+  CheckCircle,
+  XCircle,
+  Loader2,
+} from "lucide-react";
 import { toast } from "sonner";
 
 export default function RoomsPage() {
@@ -34,6 +41,7 @@ export default function RoomsPage() {
   const [loading, setLoading] = useState(true);
   const [bookingDialogOpen, setBookingDialogOpen] = useState(false);
   const [selectedRoom, setSelectedRoom] = useState(null);
+  const [bookingInProgress, setBookingInProgress] = useState(false);
   const [bookingForm, setBookingForm] = useState({
     bookingDate: "",
     startTime: "",
@@ -154,6 +162,8 @@ export default function RoomsPage() {
     // Validate before doing anything expensive
     if (!validateBookingForm()) return;
 
+    setBookingInProgress(true);
+
     try {
       const bookingDate = new Date(
         `${bookingForm.bookingDate}T00:00:00`
@@ -235,6 +245,8 @@ export default function RoomsPage() {
       toast.error(
         error.message || "An error occurred while processing your booking."
       );
+    } finally {
+      setBookingInProgress(false);
     }
   };
 
@@ -454,9 +466,18 @@ export default function RoomsPage() {
                   <Button
                     className="w-full"
                     onClick={() => handleBookRoom(room)}
-                    disabled={!room.isAvailable}
+                    disabled={!room.isAvailable || bookingInProgress}
                   >
-                    {room.isAvailable ? "Book Room" : "Not Available"}
+                    {bookingInProgress ? (
+                      <>
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        Processing Payment...
+                      </>
+                    ) : room.isAvailable ? (
+                      "Book Room"
+                    ) : (
+                      "Not Available"
+                    )}
                   </Button>
                 </CardContent>
               </Card>
@@ -576,11 +597,23 @@ export default function RoomsPage() {
                   variant="outline"
                   className="flex-1"
                   onClick={() => setBookingDialogOpen(false)}
+                  disabled={bookingInProgress}
                 >
                   Batal
                 </Button>
-                <Button type="submit" className="flex-1">
-                  Konfirmasi Booking
+                <Button
+                  type="submit"
+                  className="flex-1"
+                  disabled={bookingInProgress}
+                >
+                  {bookingInProgress ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Processing...
+                    </>
+                  ) : (
+                    "Konfirmasi Booking"
+                  )}
                 </Button>
               </div>
             </form>
