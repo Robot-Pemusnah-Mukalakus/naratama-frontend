@@ -86,7 +86,7 @@ export default function MembershipPage() {
     },
     {
       name: "Premium Member",
-      price: "Rp 100,000/year",
+      price: "Rp 100,000/month",
       icon: Crown,
       color: "text-blue-600",
       bgColor: "bg-blue-50",
