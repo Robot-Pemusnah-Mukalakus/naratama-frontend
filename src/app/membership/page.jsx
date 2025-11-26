@@ -92,13 +92,13 @@ export default function MembershipPage() {
       bgColor: "bg-blue-50",
       popular: true,
       benefits: [
+        "All from Basic Member",
         "Borrow up to 7 books at a time",
         "30-day loan period",
         "Access to premium catalog",
         "Priority room booking",
         "No late fees for first week",
         "Early access to new arrivals",
-        "Digital resource access",
       ],
     },
     // {

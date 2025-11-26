@@ -22,6 +22,7 @@ import {
   Library,
   Users,
   Clock,
+  Users2,
 } from "lucide-react";
 import useEmblaCarousel from "embla-carousel-react";
 import Autoplay from "embla-carousel-autoplay";
@@ -32,10 +33,9 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
 
   // Embla Carousel for Features section with infinite loop and autoplay
-  const [emblaRef] = useEmblaCarousel(
-    { loop: true, align: "start" },
-    [Autoplay({ delay: 3500, stopOnInteraction: false })]
-  );
+  const [emblaRef] = useEmblaCarousel({ loop: true, align: "start" }, [
+    Autoplay({ delay: 3500, stopOnInteraction: false }),
+  ]);
 
   useEffect(() => {
     fetchHomeData();
@@ -64,7 +64,7 @@ export default function Home() {
   return (
     <div className="flex flex-col">
       {/* Hero Section */}
-      <section 
+      <section
         className="relative py-20 bg-cover bg-center"
         style={{
           backgroundImage: "url('/library.jpg')",
@@ -72,7 +72,7 @@ export default function Home() {
       >
         {/* Blurry white overlay */}
         <div className="absolute inset-0 bg-white/10 backdrop-blur-sm"></div>
-        
+
         <div className="container mx-auto px-4 relative z-10">
           <div className="max-w-3xl mx-auto text-center">
             <div className="inline-flex items-center justify-center p-3 bg-primary/10 rounded-full mb-6">
@@ -87,13 +87,20 @@ export default function Home() {
             </p>
             <div className="flex gap-4 justify-center">
               <Link href="/books">
-                <Button size="lg" className="gap-2 transition-transform duration-300 hover:scale-110">
+                <Button
+                  size="lg"
+                  className="gap-2 transition-transform duration-300 hover:scale-110"
+                >
                   <BookOpen className="h-5 w-5" />
                   Browse Books
                 </Button>
               </Link>
               <Link href="/rooms">
-                <Button size="lg" variant="outline" className="gap-2 transition-transform duration-300 hover:scale-110">
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="gap-2 transition-transform duration-300 hover:scale-110"
+                >
                   <DoorOpen className="h-5 w-5" />
                   Book a Room
                 </Button>
@@ -132,7 +139,8 @@ export default function Home() {
                     </div>
                     <CardTitle>Study Rooms</CardTitle>
                     <CardDescription>
-                      Book comfortable study rooms for individual or group sessions
+                      Book comfortable study rooms for individual or group
+                      sessions
                     </CardDescription>
                   </CardHeader>
                 </Card>
@@ -146,7 +154,22 @@ export default function Home() {
                     </div>
                     <CardTitle>Easy Borrowing</CardTitle>
                     <CardDescription>
-                      Simple and fast book borrowing system with automated tracking
+                      Simple and fast book borrowing system with automated
+                      tracking
+                    </CardDescription>
+                  </CardHeader>
+                </Card>
+              </div>
+
+              <div className="flex-[0_0_100%] min-w-0 md:flex-[0_0_50%] lg:flex-[0_0_33.333%] pl-3 pr-3">
+                <Card className="text-center h-full">
+                  <CardHeader>
+                    <div className="mx-auto mb-4 p-3 bg-primary/10 rounded-full w-fit">
+                      <Users2 className="h-8 w-8 text-primary" />
+                    </div>
+                    <CardTitle>Membership</CardTitle>
+                    <CardDescription>
+                      Enjoy fast booking and other exclusive member benefits
                     </CardDescription>
                   </CardHeader>
                 </Card>
@@ -176,7 +199,8 @@ export default function Home() {
                     </div>
                     <CardTitle>Study Rooms</CardTitle>
                     <CardDescription>
-                      Book comfortable study rooms for individual or group sessions
+                      Book comfortable study rooms for individual or group
+                      sessions
                     </CardDescription>
                   </CardHeader>
                 </Card>
@@ -190,7 +214,8 @@ export default function Home() {
                     </div>
                     <CardTitle>Easy Borrowing</CardTitle>
                     <CardDescription>
-                      Simple and fast book borrowing system with automated tracking
+                      Simple and fast book borrowing system with automated
+                      tracking
                     </CardDescription>
                   </CardHeader>
                 </Card>
@@ -211,7 +236,10 @@ export default function Home() {
               </p>
             </div>
             <Link href="/books">
-              <Button variant="outline" className="gap-2 transition-transform duration-300 hover:scale-110">
+              <Button
+                variant="outline"
+                className="gap-2 transition-transform duration-300 hover:scale-110"
+              >
                 View All
                 <ArrowRight className="h-4 w-4" />
               </Button>
@@ -250,7 +278,10 @@ export default function Home() {
                   </CardContent>
                   <CardFooter>
                     <Link href={`/books/${book.id}`} className="w-full">
-                      <Button variant="outline" className="w-full transition-transform duration-300 hover:scale-110">
+                      <Button
+                        variant="outline"
+                        className="w-full transition-transform duration-300 hover:scale-110"
+                      >
                         View Details
                       </Button>
                     </Link>
@@ -273,7 +304,10 @@ export default function Home() {
               </p>
             </div>
             <Link href="/announcements">
-              <Button variant="outline" className="gap-2 transition-transform duration-300 hover:scale-110">
+              <Button
+                variant="outline"
+                className="gap-2 transition-transform duration-300 hover:scale-110"
+              >
                 View All
                 <ArrowRight className="h-4 w-4" />
               </Button>
@@ -350,7 +384,11 @@ export default function Home() {
             Join Naratama Library today and unlock a world of knowledge
           </p>
           <Link href="/auth/register">
-            <Button size="lg" variant="secondary" className="gap-2 transition-transform duration-300 hover:scale-110">
+            <Button
+              size="lg"
+              variant="secondary"
+              className="gap-2 transition-transform duration-300 hover:scale-110"
+            >
               <Users className="h-5 w-5" />
               Create Account
             </Button>
